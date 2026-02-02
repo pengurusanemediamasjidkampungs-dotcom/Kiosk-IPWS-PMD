@@ -30,6 +30,7 @@ graph LR
     B -- Display --> E[🖥️ Mini PC / Smart TV Masjid]
 ```
 
+
 📁 Struktur Kandungan
 index.html : Enjin utama paparan kiosk (Logic & UI).
 
@@ -37,12 +38,14 @@ assets/ : Folder simpanan imej poster dan grafik dakwah.
 
 README.md : Dokumentasi teknikal dan panduan pengurusan.
 
+
 ⚙️ Cara Kemaskini Kandungan
 Iklan/Poster: Muat naik fail imej ke folder assets/ dan kemaskini pautan di index.html.
 
 Teks Bergerak: Tukar teks di dalam tag <marquee> pada fail index.html.
 
 Commit & Push: Simpan perubahan ke GitHub untuk kemaskini automatik.
+
 
 📅 Pelan Pembangunan (Roadmap)
 [x] Fasa 1: Integrasi API Waktu Solat Selangor.
@@ -52,6 +55,7 @@ Commit & Push: Simpan perubahan ke GitHub untuk kemaskini automatik.
 [ ] Fasa 3: Integrasi Video Dakwah (MP4/YouTube).
 
 [ ] Fasa 4: Paparan automatik jumlah kutipan tabung mingguan.
+
 
 👨‍💻 Pembangun Sistem
 Unit E-Media & Digital MKSLB Menerajui Transformasi Digital Institusi Masjid demi keredhaan-Nya.
