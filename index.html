@@ -46,7 +46,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* DYNAMIC INFO BAR */
+        /* DYNAMIC INFO BAR DENGAN ANIMASI */
         .info-bar {
             grid-column: 1 / -1;
             background: var(--grad);
@@ -72,7 +72,7 @@
         #live-clock { font-size: 4.2rem; font-weight: 900; font-family: 'Monaco', monospace; line-height: 1; color: var(--white); }
         #live-date { font-size: 1.2rem; margin-top: 8px; color: var(--gold); font-weight: 600; }
 
-        /* CONTENT AREA - KURANG BLUR */
+        /* CONTENT AREA */
         .content-area {
             background: #000;
             border-radius: 30px;
@@ -96,20 +96,20 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* OVERLAY TEKS - KURANG BLUR & LEBIH TRANSPARENT */
+        /* OVERLAY TEKS DAKWAH - KURANG BLUR */
         .dakwah-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7)); /* Gradasi lebih halus */
-            padding: 30px 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8)); 
+            padding: 35px 20px;
             text-align: center;
         }
         .dakwah-text { 
-            font-size: 1.4rem; 
+            font-size: 1.45rem; 
             font-style: italic; 
             font-weight: 400; 
             text-shadow: 2px 2px 10px rgba(0,0,0,1); 
-            color: rgba(255,255,255,0.9);
+            color: rgba(255,255,255,0.95);
         }
 
         /* SIDEBAR MODERN */
@@ -133,22 +133,22 @@
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 18px;
             height: 13.5%;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .prayer-card .label { font-weight: 700; font-size: 1.1rem; opacity: 0.6; }
+        .prayer-card .label { font-weight: 700; font-size: 1.1rem; opacity: 0.5; }
         .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.8rem; text-align: center; color: var(--white); }
         .prayer-card .countdown { font-size: 0.9rem; color: var(--gold); text-align: right; font-weight: bold; }
 
-        /* HIGHLIGHT DENGAN KESAN GLOW */
+        /* HIGHLIGHT MODERN */
         .highlight {
             background: rgba(212, 175, 55, 0.15) !important;
             border: 1px solid var(--gold) !important;
-            box-shadow: 0 0 20px var(--gold-glow);
-            transform: translateX(-5px);
+            box-shadow: 0 0 25px var(--gold-glow);
+            transform: translateX(-8px);
         }
         .highlight .label { opacity: 1; color: var(--gold); }
-        .highlight .time { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+        .highlight .time { color: var(--gold); text-shadow: 0 0 12px var(--gold-glow); }
 
     </style>
 </head>
@@ -196,7 +196,7 @@
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
 
-    // Format 12 Jam untuk Sidebar & Jam Utama
+    // FUNGSI 1: FORMAT 12 JAM (AM/PM)
     function format12h(timeStr, includeSeconds = false) {
         if (!timeStr) return "--:--";
         let hours, minutes, seconds = "00";
@@ -218,6 +218,7 @@
         return includeSeconds ? `${hStr}:${mStr}:${sStr} ${ampm}` : `${hStr}:${mStr} ${ampm}`;
     }
 
+    // FUNGSI 2: AMBIL DATA API
     async function getPrayerTimes() {
         try {
             const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
@@ -233,19 +234,31 @@
                 }
                 updateHighlight();
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Ralat API:", e); }
     }
 
+    // FUNGSI 3: AUTO REFRESH (2AM & 3PM)
     function checkAutoRefresh(now) {
         const hour = now.getHours();
         const min = now.getMinutes();
-        if (hour === 2 && min === 0 && !hasRefreshedAM) { location.reload(); }
-        if (hour === 15 && min === 0 && !hasRefreshedPM) { location.reload(); }
+        // 2:00 AM
+        if (hour === 2 && min === 0 && !hasRefreshedAM) {
+            hasRefreshedAM = true;
+            location.reload();
+        }
+        // 3:00 PM (15:00)
+        if (hour === 15 && min === 0 && !hasRefreshedPM) {
+            hasRefreshedPM = true;
+            location.reload();
+        }
+        // Reset flags
+        if (hour !== 2) hasRefreshedAM = false;
+        if (hour !== 15) hasRefreshedPM = false;
     }
 
+    // FUNGSI 4: UPDATE JAM & COUNTDOWN
     function updateClock() {
         const now = new Date();
-        // Jam Utama dalam format 12 jam
         document.getElementById('live-clock').innerText = format12h(now, true);
         
         const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
@@ -256,25 +269,32 @@
         checkAutoRefresh(now);
     }
 
+    // FUNGSI 5: LOGIK COUNTDOWN
     function updateCountdown(now) {
         if (!prayerTimesData) return;
         const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
+        
         for (let id in map) {
             const [h, m] = prayerTimesData[map[id]].split(':');
             const target = new Date();
             target.setHours(h, m, 0);
+
             const diff = target - now;
             const el = document.getElementById(`cd-${id}`);
+            
             if (diff > 0) {
                 const totalSec = Math.floor(diff / 1000);
                 const hrs = Math.floor(totalSec / 3600);
                 const mins = Math.floor((totalSec % 3600) / 60);
                 const secs = totalSec % 60;
                 el.innerText = hrs > 0 ? `-${hrs}j ${mins}m` : `-${mins}m ${secs}s`;
-            } else { el.innerText = ""; }
+            } else {
+                el.innerText = "";
+            }
         }
     }
 
+    // FUNGSI 6: KESAN HIGHLIGHT
     function updateHighlight() {
         if (!prayerTimesData) return;
         const now = new Date();
@@ -286,15 +306,18 @@
             {id:'maghrib', t:prayerTimesData.maghrib},
             {id:'isyak', t:prayerTimesData.isya}
         ];
+
         let activeId = "";
         times.forEach(p => {
             const [h, m] = p.t.split(':');
             if (curTime >= (parseInt(h) * 60 + parseInt(m))) activeId = p.id;
         });
+
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (activeId) document.getElementById(activeId).classList.add('highlight');
     }
 
+    // FUNGSI 7: SLIDE ROTATION
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -304,6 +327,7 @@
         slides[currentSlide].classList.add('active');
     }
 
+    // RUNNERS
     setInterval(updateClock, 1000);
     setInterval(rotateSlides, 10000);
     getPrayerTimes();
