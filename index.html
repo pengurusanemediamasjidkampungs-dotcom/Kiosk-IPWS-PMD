@@ -215,29 +215,38 @@
             const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
             const data = await res.json();
             
-            // Format tarikh untuk cari Key dalam JSON (02-Feb-2026)
+            // Format tarikh untuk cari Key dalam JSON (Contoh: 02-Feb-2026)
             const today = new Date();
             const dateKey = today.toLocaleDateString('en-GB', { 
                 day: '2-digit', month: 'short', year: 'numeric' 
             }).replace(/ /g, '-');
 
-            const times = data[dateKey];
+            // Akses melalui data.takwim mengikut struktur JSON anda
+            const times = data.takwim[dateKey];
 
             if (times) {
                 const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
                 ids.forEach(id => {
                     const timeCell = document.querySelector(`#${id} .time`);
-                    if(timeCell) timeCell.innerText = format12h(times[id]);
+                    if(timeCell) {
+                        // Papar dalam format 12-jam AM/PM
+                        timeCell.innerText = format12h(times[id]);
+                    }
                 });
                 checkHighlight(times);
+                console.log("Jadual solat berjaya dikemaskini untuk: " + dateKey);
+            } else {
+                console.error("Data untuk tarikh " + dateKey + " tidak dijumpai dalam takwim.");
             }
-        } catch (e) { console.error("Ralat API:", e); }
+        } catch (e) { 
+            console.error("Ralat memuatkan API:", e); 
+        }
     }
 
     function checkHighlight(times) {
         const now = new Date();
         const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak']; // Syuruk & Imsak tidak highlight sebagai waktu solat fardu
+        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak']; 
         
         let active = "";
         for (let id of ids) { 
@@ -250,7 +259,7 @@
 
     function updateClock() {
         const now = new Date();
-        // Jam kekal 24 jam untuk ketepatan kiosk
+        // Jam digital atas (24 jam)
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
         
         // Tarikh Masihi & Hijri (Auto)
@@ -269,9 +278,10 @@
         slides[currentSlide].classList.add('active');
     }
 
+    // Interval & Initial Calls
     setInterval(updateClock, 1000);
     setInterval(rotateSlides, 15000); 
-    setInterval(getPrayerTimes, 3600000); // Kemaskini API setiap jam
+    setInterval(getPrayerTimes, 3600000); // Semak API setiap jam
     
     updateClock();
     getPrayerTimes();
