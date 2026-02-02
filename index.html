@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V2.2 Info Bar Top</title>
+    <title>Kiosk Digital MKSLB - V2.5 Smart Refresh</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -24,8 +24,7 @@
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 450px;
-            /* Layout Susunan: Header (160px), Info Bar (60px), Selebihnya Kandungan */
-            grid-template-rows: 160px 60px 1fr;
+            grid-template-rows: 150px 50px 1fr;
             height: 100vh;
             gap: 10px;
             padding: 15px;
@@ -36,38 +35,36 @@
             grid-column: 1 / -1;
             background: var(--glass);
             backdrop-filter: blur(25px);
-            border-radius: 25px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            padding: 0 40px;
+            padding: 0 30px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* INFO BAR (MARQUEE) DI ATAS */
         .info-bar {
             grid-column: 1 / -1;
             background: var(--gold);
             color: black;
-            border-radius: 15px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 800;
             overflow: hidden;
-            border: 2px solid rgba(0,0,0,0.1);
         }
 
-        .logo { width: 90px; height: 90px; margin-right: 25px; object-fit: contain; }
-        .masjid-name h1 { margin: 0; font-size: 2.4rem; color: var(--gold); letter-spacing: 1px; }
-        .masjid-name p { margin: 5px 0 0; opacity: 0.7; font-size: 1.1rem; }
+        .logo { width: 80px; height: 80px; margin-right: 20px; object-fit: contain; }
+        .masjid-name h1 { margin: 0; font-size: 2.1rem; color: var(--gold); letter-spacing: 1px; }
+        .masjid-name p { margin: 5px 0 0; opacity: 0.7; font-size: 1rem; }
 
         .clock-box { margin-left: auto; text-align: right; }
-        #live-clock { font-size: 4.5rem; font-weight: 800; font-family: 'Courier New', monospace; line-height: 1; }
-        #live-date { font-size: 1.3rem; margin-top: 5px; color: var(--gold); }
+        #live-clock { font-size: 4rem; font-weight: 800; font-family: 'Courier New', monospace; line-height: 1; }
+        #live-date { font-size: 1.1rem; margin-top: 5px; color: var(--gold); }
 
         .content-area {
-            background: rgba(255,255,255,0.02);
-            border-radius: 30px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
             border: 1px solid rgba(255,255,255,0.05);
@@ -75,26 +72,27 @@
 
         .slide {
             width: 100%; height: 100%;
-            background-size: cover;
+            background-size: contain; /* Kekal fit tanpa zoom */
+            background-repeat: no-repeat;
             background-position: center;
             display: none;
-            animation: fadeEffect 1.5s ease-in-out;
+            animation: fadeEffect 1s ease-in-out;
         }
         .slide.active { display: block; }
 
         .dakwah-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 50px 20px 30px;
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
             text-align: center;
         }
-        .dakwah-text { font-size: 1.6rem; font-style: italic; font-weight: 300; }
+        .dakwah-text { font-size: 1.2rem; font-style: italic; }
 
         .prayer-sidebar {
             background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -104,26 +102,25 @@
 
         .prayer-card {
             display: grid;
-            grid-template-columns: 100px 1fr 110px;
+            grid-template-columns: 90px 1fr 120px;
             align-items: center;
-            padding: 12px 15px;
+            padding: 10px 15px;
             background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            transition: all 0.5s ease;
+            border-radius: 12px;
+            height: 14%;
         }
 
-        .prayer-card .label { font-weight: 600; font-size: 1.1rem; }
-        .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.6rem; text-align: center; }
-        .prayer-card .countdown { font-size: 0.85rem; color: var(--gold); text-align: right; font-weight: bold; }
+        .prayer-card .label { font-weight: 600; font-size: 1rem; }
+        .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.5rem; text-align: center; }
+        .prayer-card .countdown { font-size: 0.8rem; color: var(--gold); text-align: right; }
 
         .highlight {
             background: var(--gold) !important;
             color: black !important;
-            transform: scale(1.02);
         }
         .highlight .time, .highlight .countdown { color: black !important; }
 
-        @keyframes fadeEffect { from {opacity: 0.4} to {opacity: 1} }
+        @keyframes fadeEffect { from {opacity: 0.2} to {opacity: 1} }
     </style>
 </head>
 <body>
@@ -167,6 +164,8 @@
 
 <script>
     let prayerTimesData = null;
+    let hasRefreshedAM = false;
+    let hasRefreshedPM = false;
 
     function format12h(timeStr) {
         if (!timeStr) return "--:--";
@@ -179,10 +178,9 @@
 
     async function getPrayerTimes() {
         try {
-            // Menggunakan API Selangor Zon 3 (Kuala Langat)
             const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
             const data = await res.json();
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date().toLocaleDateString('en-CA'); 
             const info = data.jadual.find(item => item.tarikh === today);
 
             if (info) {
@@ -193,12 +191,43 @@
                 }
                 updateHighlight();
             }
-        } catch (e) { console.error("Ralat API:", e); }
+        } catch (e) { console.error(e); }
     }
 
-    function updateCountdown() {
-        if (!prayerTimesData) return;
+    // LOGIK AUTO REFRESH
+    function checkAutoRefresh(now) {
+        const hour = now.getHours();
+        const min = now.getMinutes();
+
+        // REFRESH 1: Jam 2 Pagi (02:00)
+        if (hour === 2 && min === 0 && !hasRefreshedAM) {
+            hasRefreshedAM = true;
+            location.reload();
+        }
+        // REFRESH 2: Jam 3 Petang (15:00)
+        if (hour === 15 && min === 0 && !hasRefreshedPM) {
+            hasRefreshedPM = true;
+            location.reload();
+        }
+
+        // Reset flag bila waktu dah berlalu
+        if (hour !== 2) hasRefreshedAM = false;
+        if (hour !== 15) hasRefreshedPM = false;
+    }
+
+    function updateClock() {
         const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
+        const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
+        document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
+        
+        updateCountdown(now);
+        checkAutoRefresh(now);
+    }
+
+    function updateCountdown(now) {
+        if (!prayerTimesData) return;
         const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
         
         for (let id in map) {
@@ -206,10 +235,9 @@
             const target = new Date();
             target.setHours(h, m, 0);
 
-            let diff = target - now;
-            
-            // Jika waktu solat sudah lepas hari ini, jangan tunjuk countdown negatif
+            const diff = target - now;
             const el = document.getElementById(`cd-${id}`);
+            
             if (diff > 0) {
                 const totalSec = Math.floor(diff / 1000);
                 const hrs = Math.floor(totalSec / 3600);
@@ -226,7 +254,6 @@
         if (!prayerTimesData) return;
         const now = new Date();
         const curTime = now.getHours() * 60 + now.getMinutes();
-        
         const times = [
             {id:'subuh', t:prayerTimesData.subuh},
             {id:'zohor', t:prayerTimesData.zohor},
@@ -245,17 +272,6 @@
         if (activeId) document.getElementById(activeId).classList.add('highlight');
     }
 
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
-        
-        const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
-        
-        document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
-        updateCountdown();
-    }
-
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -266,7 +282,7 @@
     }
 
     setInterval(updateClock, 1000);
-    setInterval(rotateSlides, 10000); // Tukar gambar setiap 10 saat
+    setInterval(rotateSlides, 10000);
     getPrayerTimes();
 </script>
 </body>
