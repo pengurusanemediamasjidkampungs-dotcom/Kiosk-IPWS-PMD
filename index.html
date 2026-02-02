@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V4.4 Final Fix</title>
+    <title>Kiosk Digital MKSLB - V5.0 Stable</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -67,7 +67,7 @@
         }
 
         #header-countdown {
-            min-width: 320px;
+            min-width: 350px;
             text-align: center;
             padding: 8px 18px;
             border-radius: 15px;
@@ -200,20 +200,36 @@
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
 
-    // Fungsi Format 12 Jam yang mantap (Memperbaiki isu Zohor 1:30 AM)
-    function format12h(timeStr, includeSeconds = false) {
-        if (!timeStr) return "--:--";
+    // --- FUNGSI PENTERJEMAH UTAMA (FIX FORMAT 1:30 -> 13:30) ---
+    function normalizeTime(timeStr, prayerName) {
+        if(!timeStr) return { h: 0, m: 0 };
+        let [h, m] = timeStr.split(':').map(Number);
+        const name = prayerName.toLowerCase();
+
+        // Waktu yang jatuh pada waktu petang/malam dalam JSON anda
+        if (['zohor', 'asar', 'maghrib', 'isya'].includes(name)) {
+            if (h < 12) h += 12; // Tukar 1:30 jadi 13:30, 7:29 jadi 19:29 dll
+        }
+        
+        // Safety check untuk Imsak/Subuh jika ditulis jam 12:xx malam
+        if (['imsak', 'subuh'].includes(name) && h === 12) h = 0;
+
+        return { h, m };
+    }
+
+    // Format paparan jam
+    function format12h(input, includeSeconds = false) {
         let hours, minutes, seconds = 0;
         
-        if (timeStr instanceof Date) {
-            hours = timeStr.getHours();
-            minutes = timeStr.getMinutes();
-            seconds = timeStr.getSeconds();
+        if (input instanceof Date) {
+            hours = input.getHours();
+            minutes = input.getMinutes();
+            seconds = input.getSeconds();
         } else {
-            const parts = timeStr.split(':').map(Number);
+            // Jika string dari JSON
+            const parts = input.split(':').map(Number);
             hours = parts[0];
             minutes = parts[1];
-            seconds = parts[2] || 0;
         }
         
         const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -234,10 +250,23 @@
             
             if (info) {
                 prayerTimesData = info.waktu;
-                const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
-                for (let id in map) {
-                    document.querySelector(`#${id} .time`).innerText = format12h(prayerTimesData[map[id]]);
-                }
+                
+                // Kemaskini paparan sidebar dengan label AM/PM yang betul
+                const map = [
+                    {id: 'imsak', key: 'imsak'},
+                    {id: 'subuh', key: 'subuh'},
+                    {id: 'syuruk', key: 'syuruq'},
+                    {id: 'zohor', key: 'zohor'},
+                    {id: 'asar', key: 'asar'},
+                    {id: 'maghrib', key: 'maghrib'},
+                    {id: 'isyak', key: 'isya'}
+                ];
+
+                map.forEach(item => {
+                    const {h, m} = normalizeTime(prayerTimesData[item.key], item.id);
+                    document.querySelector(`#${item.id} .time`).innerText = format12h(`${h}:${m}`);
+                });
+
                 updateHighlight();
             }
         } catch (e) { console.error("Error Fetching:", e); }
@@ -247,18 +276,19 @@
         if (!prayerTimesData) return;
 
         const pTimes = [
-            { name: "IMSAK", time: prayerTimesData.imsak },
-            { name: "SUBUH", time: prayerTimesData.subuh },
-            { name: "SYURUK", time: prayerTimesData.syuruq },
-            { name: "ZOHOR", time: prayerTimesData.zohor },
-            { name: "ASAR", time: prayerTimesData.asar },
-            { name: "MAGHRIB", time: prayerTimesData.maghrib },
-            { name: "ISYAK", time: prayerTimesData.isya }
+            { name: "IMSAK", key: "imsak" },
+            { name: "SUBUH", key: "subuh" },
+            { name: "SYURUK", key: "syuruq" },
+            { name: "ZOHOR", key: "zohor" },
+            { name: "ASAR", key: "asar" },
+            { name: "MAGHRIB", key: "maghrib" },
+            { name: "ISYAK", key: "isya" }
         ];
 
         let nextPrayer = null;
+
         for (let p of pTimes) {
-            const [h, m] = p.time.split(':').map(Number);
+            const { h, m } = normalizeTime(prayerTimesData[p.key], p.name);
             const target = new Date(now);
             target.setHours(h, m, 0, 0);
 
@@ -268,8 +298,9 @@
             }
         }
 
+        // Jika dah lepas Isyak, cari Imsak esok
         if (!nextPrayer) {
-            const [h, m] = pTimes[0].time.split(':').map(Number);
+            const { h, m } = normalizeTime(prayerTimesData["imsak"], "imsak");
             const target = new Date(now);
             target.setDate(target.getDate() + 1);
             target.setHours(h, m, 0, 0);
@@ -289,28 +320,27 @@
         else countdownEl.classList.remove('liquid-red');
     }
 
-    // Logik Highlight yang diperbetulkan (Sesuai dengan Waktu Malaysia)
     function updateHighlight() {
         if (!prayerTimesData) return;
         const now = new Date();
         const curMin = now.getHours() * 60 + now.getMinutes();
         
         const schedule = [
-            {id:'imsak', t:prayerTimesData.imsak},
-            {id:'subuh', t:prayerTimesData.subuh},
-            {id:'syuruk', t:prayerTimesData.syuruq},
-            {id:'zohor', t:prayerTimesData.zohor},
-            {id:'asar', t:prayerTimesData.asar},
-            {id:'maghrib', t:prayerTimesData.maghrib},
-            {id:'isyak', t:prayerTimesData.isya}
+            {id: 'imsak', key: 'imsak'},
+            {id: 'subuh', key: 'subuh'},
+            {id: 'syuruk', key: 'syuruq'},
+            {id: 'zohor', key: 'zohor'},
+            {id: 'asar', key: 'asar'},
+            {id: 'maghrib', key: 'maghrib'},
+            {id: 'isyak', key: 'isya'}
         ];
 
         let activeId = "";
-        for (let i = 0; i < schedule.length; i++) {
-            const [h, m] = schedule[i].t.split(':').map(Number);
+        for (let p of schedule) {
+            const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
             const pMin = h * 60 + m;
             if (curMin >= pMin) {
-                activeId = schedule[i].id;
+                activeId = p.id;
             }
         }
 
