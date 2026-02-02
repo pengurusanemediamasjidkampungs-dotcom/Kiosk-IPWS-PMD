@@ -159,28 +159,19 @@
                 <div class="dakwah-text">Jadual Kuliah Harian Sepanjang Februari 2026.</div>
             </div>
         </div>
-
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/KuliahBulananFebruari2026KuliahPerdana.jpg');">
             <div class="dakwah-overlay">
                 <div class="dakwah-text">Kuliah Perdana: Jemput hadir memenuhi taman-taman syurga.</div>
             </div>
         </div>
-
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/Majlis-Bacaan-Yasin-Nisfu-Syaaban.jpg');">
             <div class="dakwah-overlay">
                 <div class="dakwah-text">Majlis Bacaan Yasin & Nisfu Sya'ban.</div>
             </div>
         </div>
-
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('info/SelKitar.jpg');">
             <div class="dakwah-overlay">
                 <div class="dakwah-text">"Kebersihan itu sebahagian daripada iman." - Pastikan kawasan masjid sentiasa bersih.</div>
-            </div>
-        </div>
-
-        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('info/5-Rs.webp');">
-            <div class="dakwah-overlay">
-                <div class="dakwah-text">Amalkan konsep 5R untuk kelestarian alam sekitar kita.</div>
             </div>
         </div>
     </div>
@@ -201,7 +192,11 @@
 </div>
 
 <script>
-    // Fungsi menukar waktu 24j ke 12j AM/PM
+    /**
+     * Kiosk-IPWS-PMD Logic
+     */
+
+    // 1. Fungsi Pembantu: Format AM/PM
     function format12h(timeStr) {
         if (!timeStr || timeStr === "--:--") return "--:--";
         let [hours, minutes] = timeStr.split(':');
@@ -210,65 +205,61 @@
         return `${hours}:${minutes} ${modifier}`;
     }
 
-    async function getPrayerTimes() {
-        try {
-            const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
-            const data = await res.json();
-            
-            // Format tarikh untuk cari Key dalam JSON (Contoh: 02-Feb-2026)
-            const today = new Date();
-            const dateKey = today.toLocaleDateString('en-GB', { 
-                day: '2-digit', month: 'short', year: 'numeric' 
-            }).replace(/ /g, '-');
+    // 2. Kemaskini Jam & Tarikh
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+        
+        const clockElement = document.getElementById('live-clock');
+        if(clockElement) clockElement.innerText = timeString;
 
-            // Akses melalui data.takwim mengikut struktur JSON anda
-            const times = data.takwim[dateKey];
+        const masihi = now.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
 
-            if (times) {
-                const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
-                ids.forEach(id => {
-                    const timeCell = document.querySelector(`#${id} .time`);
-                    if(timeCell) {
-                        // Papar dalam format 12-jam AM/PM
-                        timeCell.innerText = format12h(times[id]);
-                    }
-                });
-                checkHighlight(times);
-                console.log("Jadual solat berjaya dikemaskini untuk: " + dateKey);
-            } else {
-                console.error("Data untuk tarikh " + dateKey + " tidak dijumpai dalam takwim.");
-            }
-        } catch (e) { 
-            console.error("Ralat memuatkan API:", e); 
-        }
+        const dateElement = document.getElementById('live-date');
+        if(dateElement) dateElement.innerText = `${masihi} | ${hijri}`;
     }
 
-    function checkHighlight(times) {
+    // 3. Tarik Data API (SGR03)
+    async function kemaskiniWaktuSolat() {
+        const url = 'https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json';
+
+        try {
+            const respon = await fetch(url);
+            if (!respon.ok) throw new Error('Gagal mengakses fail API');
+            const data = await respon.json();
+
+            const today = new Date();
+            const dateKey = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-');
+
+            // PERBAIKAN: Akses melalui objek 'takwim' mengikut struktur JSON anda
+            const jadual = data.takwim[dateKey];
+
+            if (jadual) {
+                const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+                ids.forEach(id => {
+                    const el = document.querySelector(`#${id} .time`);
+                    if (el) el.innerText = format12h(jadual[id]);
+                });
+                checkHighlight(jadual);
+            }
+        } catch (e) { console.error("Ralat API:", e); }
+    }
+
+    // 4. Highlight Waktu Semasa
+    function checkHighlight(jadual) {
         const now = new Date();
         const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak']; 
+        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
         
         let active = "";
-        for (let id of ids) { 
-            if (current >= times[id]) active = id; 
-        }
+        for (let id of ids) { if (current >= jadual[id]) active = id; }
         
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (active) document.getElementById(active).classList.add('highlight');
     }
 
-    function updateClock() {
-        const now = new Date();
-        // Jam digital atas (24 jam)
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
-        
-        // Tarikh Masihi & Hijri (Auto)
-        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
-        const masihi = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
-        
-        document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
-    }
-
+    // 5. Slider Slideshow
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -278,14 +269,13 @@
         slides[currentSlide].classList.add('active');
     }
 
-    // Interval & Initial Calls
+    // Jalankan Kiosk
     setInterval(updateClock, 1000);
-    setInterval(rotateSlides, 15000); 
-    setInterval(getPrayerTimes, 3600000); // Semak API setiap jam
+    setInterval(rotateSlides, 15000);
+    setInterval(kemaskiniWaktuSolat, 3600000);
     
     updateClock();
-    getPrayerTimes();
+    kemaskiniWaktuSolat();
 </script>
-
 </body>
 </html>
