@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V4.3 Stable Fix</title>
+    <title>Kiosk Digital MKSLB - V4.4 Final Fix</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -67,18 +67,17 @@
         }
 
         #header-countdown {
-            min-width: 280px;
+            min-width: 320px;
             text-align: center;
             padding: 8px 18px;
             border-radius: 15px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: 800;
-            font-size: 1.3rem;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.2rem;
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--cream);
-            font-variant-numeric: tabular-nums;
+            transition: all 0.5s ease;
         }
 
         .liquid-red {
@@ -147,11 +146,11 @@
         .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.8rem; text-align: right; }
 
         .highlight {
-            background: rgba(212, 175, 55, 0.25) !important;
-            border: 1.5px solid var(--gold) !important;
+            background: rgba(212, 175, 55, 0.8) !important;
+            border: 2px solid var(--white) !important;
             box-shadow: 0 0 25px var(--gold-glow);
         }
-        .highlight .label, .highlight .time { opacity: 1; color: var(--gold); }
+        .highlight .label, .highlight .time { opacity: 1; color: #000; }
     </style>
 </head>
 <body>
@@ -201,7 +200,7 @@
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
 
-    // Fix AM/PM Logic & Formatting
+    // Fungsi Format 12 Jam yang mantap (Memperbaiki isu Zohor 1:30 AM)
     function format12h(timeStr, includeSeconds = false) {
         if (!timeStr) return "--:--";
         let hours, minutes, seconds = 0;
@@ -258,7 +257,6 @@
         ];
 
         let nextPrayer = null;
-
         for (let p of pTimes) {
             const [h, m] = p.time.split(':').map(Number);
             const target = new Date(now);
@@ -270,7 +268,6 @@
             }
         }
 
-        // Handle case for next day Imsak
         if (!nextPrayer) {
             const [h, m] = pTimes[0].time.split(':').map(Number);
             const target = new Date(now);
@@ -286,23 +283,19 @@
         const secs = totalSec % 60;
 
         const countdownEl = document.getElementById('header-countdown');
-        const displayTime = `${hrs > 0 ? hrs + 'j ' : ''}${mins}m ${secs}s`;
-        countdownEl.innerText = `${nextPrayer.name}: -${displayTime}`;
+        countdownEl.innerText = `${nextPrayer.name}: -${hrs > 0 ? hrs + 'j ' : ''}${mins}m ${secs}s`;
 
-        if (hrs === 0 && mins < 10) {
-            countdownEl.classList.add('liquid-red');
-        } else {
-            countdownEl.classList.remove('liquid-red');
-        }
+        if (hrs === 0 && mins < 10) countdownEl.classList.add('liquid-red');
+        else countdownEl.classList.remove('liquid-red');
     }
 
-    // Perbaikan Highlight: Kekal di waktu semasa sehingga waktu seterusnya masuk
+    // Logik Highlight yang diperbetulkan (Sesuai dengan Waktu Malaysia)
     function updateHighlight() {
         if (!prayerTimesData) return;
         const now = new Date();
         const curMin = now.getHours() * 60 + now.getMinutes();
         
-        const times = [
+        const schedule = [
             {id:'imsak', t:prayerTimesData.imsak},
             {id:'subuh', t:prayerTimesData.subuh},
             {id:'syuruk', t:prayerTimesData.syuruq},
@@ -313,11 +306,11 @@
         ];
 
         let activeId = "";
-        for (let i = 0; i < times.length; i++) {
-            const [h, m] = times[i].t.split(':').map(Number);
-            const prayerMin = h * 60 + m;
-            if (curMin >= prayerMin) {
-                activeId = times[i].id;
+        for (let i = 0; i < schedule.length; i++) {
+            const [h, m] = schedule[i].t.split(':').map(Number);
+            const pMin = h * 60 + m;
+            if (curMin >= pMin) {
+                activeId = schedule[i].id;
             }
         }
 
@@ -335,6 +328,7 @@
     function updateClock() {
         const now = new Date();
         document.getElementById('live-clock').innerText = format12h(now, true);
+        
         const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
         document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
