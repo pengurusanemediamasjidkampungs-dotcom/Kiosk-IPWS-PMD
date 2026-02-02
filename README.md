@@ -19,7 +19,6 @@
 * **⚡ Zero Cost:** Berjalan sepenuhnya di atas infrastruktur GitHub tanpa yuran langganan bulanan/tahunan.
 
 ---
-
 ## 🛠️ Arsitektur Sistem
 
 ```mermaid
