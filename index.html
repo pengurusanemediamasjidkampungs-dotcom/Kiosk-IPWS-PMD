@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V1.5 Premium</title>
+    <title>Kiosk Digital MKSLB - V1.7 Final</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -110,13 +110,11 @@
             border-radius: 20px;
             font-size: 1.8rem;
             transition: all 0.5s ease;
-            border: 1px solid transparent;
         }
 
         .prayer-card .label { font-weight: 300; letter-spacing: 2px; }
         .prayer-card .time { font-weight: 700; font-family: monospace; font-size: 2.2rem; }
 
-        /* Highlight Waktu Aktif/Seterusnya */
         .prayer-card.highlight {
             background: var(--gold);
             color: black;
@@ -136,7 +134,6 @@
             font-size: 1.8rem;
             font-weight: 800;
             overflow: hidden;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
         @keyframes fadeEffect { from {opacity: 0.3} to {opacity: 1} }
@@ -153,19 +150,26 @@
         </div>
         <div class="clock-box">
             <div id="live-clock">00:00:00</div>
-            <div id="live-date">Memuatkan tarikh...</div>
+            <div id="live-date">Memuatkan...</div>
         </div>
     </header>
 
     <div class="content-area" id="slider">
-        <div class="slide active" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1590076215667-873d32838380?q=80&w=2070');">
+        <div class="slide active" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/JadualKuliahHarianFebruari%202026.jpg');">
             <div class="dakwah-overlay">
-                <div class="dakwah-text">"Sampaikanlah dariku walau satu ayat." (HR Bukhari)</div>
+                <div class="dakwah-text">Jadual Kuliah Harian Sepanjang Februari 2026.</div>
             </div>
         </div>
-        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542621334-a254cf47733d?q=80&w=2070');">
+
+        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/KuliahBulananFebruari2026Kuliah%20Perdana.jpg');">
             <div class="dakwah-overlay">
-                <div class="dakwah-text">Kebersihan itu sebahagian daripada iman. Pastikan masjid kita bersih.</div>
+                <div class="dakwah-text">Kuliah Perdana: Jemput hadir memenuhi taman-taman syurga.</div>
+            </div>
+        </div>
+
+        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('info/SelKitar.jpg');">
+            <div class="dakwah-overlay">
+                <div class="dakwah-text">"Kebersihan itu sebahagian daripada iman." - Pastikan kawasan masjid sentiasa bersih.</div>
             </div>
         </div>
     </div>
@@ -180,12 +184,11 @@
     </div>
 
     <footer>
-        <marquee scrollamount="10">MAKLUMAN: Sila pastikan telefon bimbit dimatikan atau diletakkan dalam mod senyap sebelum masuk ke ruang solat. Jazakallah Khairan.</marquee>
+        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit atau mod senyap di dalam dewan solat.</marquee>
     </footer>
 </div>
 
 <script>
-    // 1. Ambil Data API & Kemaskini UI
     async function getPrayerTimes() {
         try {
             const res = await fetch('https://pengurusanemediamasjidkampungs-dotcom.github.io/api-takwim-solat-selangor-2026/selangor-zon3.json');
@@ -197,43 +200,27 @@
             ids.forEach(id => {
                 document.querySelector(`#${id} .time`).innerText = times[id];
             });
-
+            
             checkHighlight(times);
-        } catch (e) {
-            console.error("Gagal mendapatkan data takwim:", e);
-        }
+        } catch (e) { console.error("Ralat API:", e); }
     }
 
-    // 2. Fungsi Highlight Waktu Solat Aktif
     function checkHighlight(times) {
         const now = new Date();
-        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        
+        const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         const ids = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
-        let currentPrayer = "";
-
-        for (let i = 0; i < ids.length; i++) {
-            if (currentTime >= times[ids[i]]) {
-                currentPrayer = ids[i];
-            }
-        }
-
+        let active = "";
+        for (let id of ids) { if (current >= times[id]) active = id; }
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
-        if (currentPrayer) {
-            document.getElementById(currentPrayer).classList.add('highlight');
-        }
+        if (active) document.getElementById(active).classList.add('highlight');
     }
 
-    // 3. Jam & Tarikh
     function updateClock() {
         const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
-        
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', options);
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
+        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
     }
 
-    // 4. Slider Automatik
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -243,11 +230,9 @@
         slides[currentSlide].classList.add('active');
     }
 
-    // Settings
     setInterval(updateClock, 1000);
-    setInterval(rotateSlides, 15000); 
-    setInterval(getPrayerTimes, 3600000); // Semak API setiap jam
-
+    setInterval(rotateSlides, 15000); // Slide bertukar setiap 15 saat
+    setInterval(getPrayerTimes, 3600000);
     updateClock();
     getPrayerTimes();
 </script>
