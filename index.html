@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V2.5 Smart Refresh</title>
+    <title>Kiosk Digital MKSLB - V3.0 Premium Modern</title>
     <style>
         :root {
             --dark-bg: #050505;
-            --glass: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.05);
             --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.3);
             --white: #ffffff;
+            --grad: linear-gradient(90deg, #D4AF37, #f2d06b, #D4AF37);
         }
 
         body {
             margin: 0; padding: 0;
             background: var(--dark-bg);
             color: var(--white);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
         }
@@ -24,103 +26,130 @@
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 450px;
-            grid-template-rows: 150px 50px 1fr;
+            grid-template-rows: 150px 55px 1fr;
             height: 100vh;
-            gap: 10px;
-            padding: 15px;
+            gap: 15px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
+        /* HEADER MODERN */
         header {
             grid-column: 1 / -1;
             background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
             display: flex;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 40px;
             border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* DYNAMIC INFO BAR */
         .info-bar {
             grid-column: 1 / -1;
-            background: var(--gold);
+            background: var(--grad);
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
             color: black;
-            border-radius: 12px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 800;
             overflow: hidden;
+            box-shadow: 0 4px 15px var(--gold-glow);
         }
 
-        .logo { width: 80px; height: 80px; margin-right: 20px; object-fit: contain; }
-        .masjid-name h1 { margin: 0; font-size: 2.1rem; color: var(--gold); letter-spacing: 1px; }
-        .masjid-name p { margin: 5px 0 0; opacity: 0.7; font-size: 1rem; }
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .logo { width: 90px; height: 90px; margin-right: 25px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.5)); }
+        .masjid-name h1 { margin: 0; font-size: 2.3rem; color: var(--gold); letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .masjid-name p { margin: 5px 0 0; opacity: 0.8; font-size: 1.1rem; letter-spacing: 1px; }
 
         .clock-box { margin-left: auto; text-align: right; }
-        #live-clock { font-size: 4rem; font-weight: 800; font-family: 'Courier New', monospace; line-height: 1; }
-        #live-date { font-size: 1.1rem; margin-top: 5px; color: var(--gold); }
+        #live-clock { font-size: 4.2rem; font-weight: 900; font-family: 'Monaco', monospace; line-height: 1; color: var(--white); }
+        #live-date { font-size: 1.2rem; margin-top: 8px; color: var(--gold); font-weight: 600; }
 
+        /* CONTENT AREA - KURANG BLUR */
         .content-area {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
+            background: #000;
+            border-radius: 30px;
             overflow: hidden;
             position: relative;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .slide {
             width: 100%; height: 100%;
-            background-size: contain; /* Kekal fit tanpa zoom */
+            background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             display: none;
-            animation: fadeEffect 1s ease-in-out;
+            animation: zoomFade 1.5s ease-out;
         }
         .slide.active { display: block; }
 
+        @keyframes zoomFade {
+            from { opacity: 0; transform: scale(1.05); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* OVERLAY TEKS - KURANG BLUR & LEBIH TRANSPARENT */
         .dakwah-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.6);
-            padding: 15px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7)); /* Gradasi lebih halus */
+            padding: 30px 20px;
             text-align: center;
         }
-        .dakwah-text { font-size: 1.2rem; font-style: italic; }
+        .dakwah-text { 
+            font-size: 1.4rem; 
+            font-style: italic; 
+            font-weight: 400; 
+            text-shadow: 2px 2px 10px rgba(0,0,0,1); 
+            color: rgba(255,255,255,0.9);
+        }
 
+        /* SIDEBAR MODERN */
         .prayer-sidebar {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 10px;
+            border-radius: 30px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         .prayer-card {
             display: grid;
-            grid-template-columns: 90px 1fr 120px;
+            grid-template-columns: 100px 1fr 120px;
             align-items: center;
-            padding: 10px 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            height: 14%;
+            padding: 0 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 18px;
+            height: 13.5%;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .prayer-card .label { font-weight: 600; font-size: 1rem; }
-        .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.5rem; text-align: center; }
-        .prayer-card .countdown { font-size: 0.8rem; color: var(--gold); text-align: right; }
+        .prayer-card .label { font-weight: 700; font-size: 1.1rem; opacity: 0.6; }
+        .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.8rem; text-align: center; color: var(--white); }
+        .prayer-card .countdown { font-size: 0.9rem; color: var(--gold); text-align: right; font-weight: bold; }
 
+        /* HIGHLIGHT DENGAN KESAN GLOW */
         .highlight {
-            background: var(--gold) !important;
-            color: black !important;
+            background: rgba(212, 175, 55, 0.15) !important;
+            border: 1px solid var(--gold) !important;
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: translateX(-5px);
         }
-        .highlight .time, .highlight .countdown { color: black !important; }
+        .highlight .label { opacity: 1; color: var(--gold); }
+        .highlight .time { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
 
-        @keyframes fadeEffect { from {opacity: 0.2} to {opacity: 1} }
     </style>
 </head>
 <body>
@@ -139,7 +168,7 @@
     </header>
 
     <div class="info-bar">
-        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit.</marquee>
+        <marquee scrollamount="8">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan atau senyapkan telefon bimbit anda di dalam masjid.</marquee>
     </div>
 
     <div class="content-area" id="slider">
@@ -167,13 +196,26 @@
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
 
-    function format12h(timeStr) {
+    // Format 12 Jam untuk Sidebar & Jam Utama
+    function format12h(timeStr, includeSeconds = false) {
         if (!timeStr) return "--:--";
-        let [hours, minutes] = timeStr.split(':');
-        let h = parseInt(hours);
-        let m = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        return `${h}:${minutes} ${m}`;
+        let hours, minutes, seconds = "00";
+        
+        if (timeStr instanceof Date) {
+            hours = timeStr.getHours();
+            minutes = timeStr.getMinutes();
+            seconds = timeStr.getSeconds();
+        } else {
+            [hours, minutes] = timeStr.split(':').map(Number);
+        }
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const hStr = hours < 10 ? '0' + hours : hours;
+        const mStr = minutes < 10 ? '0' + minutes : minutes;
+        const sStr = seconds < 10 ? '0' + seconds : seconds;
+
+        return includeSeconds ? `${hStr}:${mStr}:${sStr} ${ampm}` : `${hStr}:${mStr} ${ampm}`;
     }
 
     async function getPrayerTimes() {
@@ -194,30 +236,18 @@
         } catch (e) { console.error(e); }
     }
 
-    // LOGIK AUTO REFRESH
     function checkAutoRefresh(now) {
         const hour = now.getHours();
         const min = now.getMinutes();
-
-        // REFRESH 1: Jam 2 Pagi (02:00)
-        if (hour === 2 && min === 0 && !hasRefreshedAM) {
-            hasRefreshedAM = true;
-            location.reload();
-        }
-        // REFRESH 2: Jam 3 Petang (15:00)
-        if (hour === 15 && min === 0 && !hasRefreshedPM) {
-            hasRefreshedPM = true;
-            location.reload();
-        }
-
-        // Reset flag bila waktu dah berlalu
-        if (hour !== 2) hasRefreshedAM = false;
-        if (hour !== 15) hasRefreshedPM = false;
+        if (hour === 2 && min === 0 && !hasRefreshedAM) { location.reload(); }
+        if (hour === 15 && min === 0 && !hasRefreshedPM) { location.reload(); }
     }
 
     function updateClock() {
         const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
+        // Jam Utama dalam format 12 jam
+        document.getElementById('live-clock').innerText = format12h(now, true);
+        
         const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
         document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
@@ -229,24 +259,19 @@
     function updateCountdown(now) {
         if (!prayerTimesData) return;
         const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
-        
         for (let id in map) {
             const [h, m] = prayerTimesData[map[id]].split(':');
             const target = new Date();
             target.setHours(h, m, 0);
-
             const diff = target - now;
             const el = document.getElementById(`cd-${id}`);
-            
             if (diff > 0) {
                 const totalSec = Math.floor(diff / 1000);
                 const hrs = Math.floor(totalSec / 3600);
                 const mins = Math.floor((totalSec % 3600) / 60);
                 const secs = totalSec % 60;
                 el.innerText = hrs > 0 ? `-${hrs}j ${mins}m` : `-${mins}m ${secs}s`;
-            } else {
-                el.innerText = "";
-            }
+            } else { el.innerText = ""; }
         }
     }
 
@@ -261,13 +286,11 @@
             {id:'maghrib', t:prayerTimesData.maghrib},
             {id:'isyak', t:prayerTimesData.isya}
         ];
-
         let activeId = "";
         times.forEach(p => {
             const [h, m] = p.t.split(':');
             if (curTime >= (parseInt(h) * 60 + parseInt(m))) activeId = p.id;
         });
-
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (activeId) document.getElementById(activeId).classList.add('highlight');
     }
