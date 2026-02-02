@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V1.8 Final</title>
+    <title>Kiosk Digital MKSLB - V2.0 Smart API</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -89,9 +89,10 @@
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-radius: 30px;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
+            gap: 10px;
             justify-content: space-between;
             border: 1px solid rgba(255,255,255,0.1);
         }
@@ -100,15 +101,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 30px;
+            padding: 12px 25px;
             background: rgba(255,255,255,0.03);
             border-radius: 20px;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             transition: all 0.5s ease;
+            border-left: 5px solid transparent;
         }
 
         .prayer-card .label { font-weight: 300; letter-spacing: 2px; }
-        .prayer-card .time { font-weight: 700; font-family: monospace; font-size: 2.2rem; }
+        .prayer-card .time { font-weight: 700; font-family: monospace; font-size: 1.9rem; }
+
+        .prayer-card.imsak-style { border-left-color: #666; opacity: 0.8; }
 
         .prayer-card.highlight {
             background: var(--gold);
@@ -116,6 +120,7 @@
             font-weight: bold;
             transform: scale(1.03);
             box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            border-left-color: white;
         }
 
         footer {
@@ -181,6 +186,7 @@
     </div>
 
     <div class="prayer-sidebar">
+        <div class="prayer-card imsak-style" id="imsak"><span class="label">IMSAK</span> <span class="time">--:--</span></div>
         <div class="prayer-card" id="subuh"><span class="label">SUBUH</span> <span class="time">--:--</span></div>
         <div class="prayer-card" id="syuruk"><span class="label">SYURUK</span> <span class="time">--:--</span></div>
         <div class="prayer-card" id="zohor"><span class="label">ZOHOR</span> <span class="time">--:--</span></div>
@@ -195,36 +201,63 @@
 </div>
 
 <script>
+    // Fungsi menukar waktu 24j ke 12j AM/PM
+    function format12h(timeStr) {
+        if (!timeStr || timeStr === "--:--") return "--:--";
+        let [hours, minutes] = timeStr.split(':');
+        let modifier = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${modifier}`;
+    }
+
     async function getPrayerTimes() {
         try {
-            const res = await fetch('https://pengurusanemediamasjidkampungs-dotcom.github.io/api-takwim-solat-selangor-2026/selangor-zon3.json');
+            const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
             const data = await res.json();
-            const today = new Date().getDate();
-            const times = data.takwim[today - 1].waktu;
-
-            const ids = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
-            ids.forEach(id => {
-                document.querySelector(`#${id} .time`).innerText = times[id];
-            });
             
-            checkHighlight(times);
+            // Format tarikh untuk cari Key dalam JSON (02-Feb-2026)
+            const today = new Date();
+            const dateKey = today.toLocaleDateString('en-GB', { 
+                day: '2-digit', month: 'short', year: 'numeric' 
+            }).replace(/ /g, '-');
+
+            const times = data[dateKey];
+
+            if (times) {
+                const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+                ids.forEach(id => {
+                    const timeCell = document.querySelector(`#${id} .time`);
+                    if(timeCell) timeCell.innerText = format12h(times[id]);
+                });
+                checkHighlight(times);
+            }
         } catch (e) { console.error("Ralat API:", e); }
     }
 
     function checkHighlight(times) {
         const now = new Date();
         const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const ids = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak']; // Syuruk & Imsak tidak highlight sebagai waktu solat fardu
+        
         let active = "";
-        for (let id of ids) { if (current >= times[id]) active = id; }
+        for (let id of ids) { 
+            if (current >= times[id]) active = id; 
+        }
+        
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (active) document.getElementById(active).classList.add('highlight');
     }
 
     function updateClock() {
         const now = new Date();
+        // Jam kekal 24 jam untuk ketepatan kiosk
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
-        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        
+        // Tarikh Masihi & Hijri (Auto)
+        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
+        const masihi = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        
+        document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
     }
 
     let currentSlide = 0;
@@ -238,7 +271,8 @@
 
     setInterval(updateClock, 1000);
     setInterval(rotateSlides, 15000); 
-    setInterval(getPrayerTimes, 3600000);
+    setInterval(getPrayerTimes, 3600000); // Kemaskini API setiap jam
+    
     updateClock();
     getPrayerTimes();
 </script>
