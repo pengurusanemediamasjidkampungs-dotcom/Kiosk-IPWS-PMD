@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V2.0 Smart API</title>
+    <title>Kiosk Digital MKSLB - V2.2 Info Bar Top</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -24,9 +24,10 @@
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 450px;
-            grid-template-rows: 160px 1fr 90px;
+            /* Layout Susunan: Header (160px), Info Bar (60px), Selebihnya Kandungan */
+            grid-template-rows: 160px 60px 1fr;
             height: 100vh;
-            gap: 15px;
+            gap: 10px;
             padding: 15px;
             box-sizing: border-box;
         }
@@ -35,7 +36,6 @@
             grid-column: 1 / -1;
             background: var(--glass);
             backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
             border-radius: 25px;
             display: flex;
             align-items: center;
@@ -43,12 +43,26 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* INFO BAR (MARQUEE) DI ATAS */
+        .info-bar {
+            grid-column: 1 / -1;
+            background: var(--gold);
+            color: black;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            overflow: hidden;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+
         .logo { width: 90px; height: 90px; margin-right: 25px; object-fit: contain; }
         .masjid-name h1 { margin: 0; font-size: 2.4rem; color: var(--gold); letter-spacing: 1px; }
         .masjid-name p { margin: 5px 0 0; opacity: 0.7; font-size: 1.1rem; }
 
         .clock-box { margin-left: auto; text-align: right; }
-        #live-clock { font-size: 4.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        #live-clock { font-size: 4.5rem; font-weight: 800; font-family: 'Courier New', monospace; line-height: 1; }
         #live-date { font-size: 1.3rem; margin-top: 5px; color: var(--gold); }
 
         .content-area {
@@ -66,87 +80,50 @@
             display: none;
             animation: fadeEffect 1.5s ease-in-out;
         }
-
         .slide.active { display: block; }
 
-        /* KEMASKINI: Overlay lebih gelap untuk keterbacaan */
         .dakwah-overlay {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 40px 20px 20px;
+            padding: 50px 20px 30px;
             text-align: center;
         }
+        .dakwah-text { font-size: 1.6rem; font-style: italic; font-weight: 300; }
 
-        .dakwah-text { font-size: 1.6rem; font-style: italic; font-weight: 300; line-height: 1.4; }
-
-        /* KEMASKINI: Sidebar lebih rapat */
         .prayer-sidebar {
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-radius: 30px;
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 8px; 
-            justify-content: center;
+            gap: 8px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* KEMASKINI: Susunan grid dalam kad waktu solat */
         .prayer-card {
             display: grid;
-            grid-template-columns: 100px 1fr 120px; 
+            grid-template-columns: 100px 1fr 110px;
             align-items: center;
-            padding: 10px 15px;
+            padding: 12px 15px;
             background: rgba(255,255,255,0.05);
             border-radius: 15px;
-            border-left: 5px solid transparent;
             transition: all 0.5s ease;
         }
 
-        .prayer-card .label { 
-            font-weight: 600; 
-            font-size: 1.1rem; 
-            letter-spacing: 1px;
-            text-align: left;
+        .prayer-card .label { font-weight: 600; font-size: 1.1rem; }
+        .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.6rem; text-align: center; }
+        .prayer-card .countdown { font-size: 0.85rem; color: var(--gold); text-align: right; font-weight: bold; }
+
+        .highlight {
+            background: var(--gold) !important;
+            color: black !important;
+            transform: scale(1.02);
         }
+        .highlight .time, .highlight .countdown { color: black !important; }
 
-        .prayer-card .time { 
-            font-weight: 800; 
-            font-family: 'Courier New', monospace; 
-            font-size: 1.6rem;
-            text-align: center;
-            color: var(--white);
-        }
-
-        .prayer-card .countdown {
-            font-size: 0.9rem;
-            font-weight: bold;
-            text-align: right;
-            color: var(--gold);
-            font-family: monospace;
-        }
-
-        .prayer-card.imsak-style { border-left-color: #666; opacity: 0.8; }
-
-        .prayer-card.highlight {
-            background: var(--gold); color: black; font-weight: bold;
-            transform: scale(1.03); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
-            border-left-color: white;
-        }
-
-        .prayer-card.highlight .time, .prayer-card.highlight .countdown { color: black; }
-
-        footer {
-            grid-column: 1 / -1; background: var(--gold); color: black;
-            border-radius: 20px; display: flex; align-items: center;
-            font-size: 1.8rem; font-weight: 800; overflow: hidden;
-        }
-
-        @keyframes fadeEffect { from {opacity: 0.3} to {opacity: 1} }
+        @keyframes fadeEffect { from {opacity: 0.4} to {opacity: 1} }
     </style>
 </head>
 <body>
@@ -164,129 +141,121 @@
         </div>
     </header>
 
+    <div class="info-bar">
+        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit.</marquee>
+    </div>
+
     <div class="content-area" id="slider">
-        <div class="slide active" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/JadualKuliahHarianFebruari%202026.jpg');">
+        <div class="slide active" style="background-image: url('program/JadualKuliahHarianFebruari%202026.jpg');">
             <div class="dakwah-overlay"><div class="dakwah-text">Jadual Kuliah Harian Sepanjang Februari 2026.</div></div>
         </div>
-        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/KuliahBulananFebruari2026KuliahPerdana.jpg');">
-            <div class="dakwah-overlay"><div class="dakwah-text">Kuliah Perdana: Jemput hadir memenuhi taman-taman syurga.</div></div>
-        </div>
-        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/Majlis-Bacaan-Yasin-Nisfu-Syaaban.jpg');">
-            <div class="dakwah-overlay"><div class="dakwah-text">Majlis Bacaan Yasin & Nisfu Sya'ban.</div></div>
-        </div>
-        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('info/SelKitar.jpg');">
+        <div class="slide" style="background-image: url('info/SelKitar.jpg');">
             <div class="dakwah-overlay"><div class="dakwah-text">"Kebersihan itu sebahagian daripada iman."</div></div>
         </div>
     </div>
 
     <div class="prayer-sidebar">
-        <div class="prayer-card imsak-style" id="imsak"><span class="label">IMSAK</span> <span class="time">--:--</span> <span class="countdown" id="cd-imsak"></span></div>
-        <div class="prayer-card" id="subuh"><span class="label">SUBUH</span> <span class="time">--:--</span> <span class="countdown" id="cd-subuh"></span></div>
-        <div class="prayer-card" id="syuruk"><span class="label">SYURUK</span> <span class="time">--:--</span> <span class="countdown" id="cd-syuruk"></span></div>
-        <div class="prayer-card" id="zohor"><span class="label">ZOHOR</span> <span class="time">--:--</span> <span class="countdown" id="cd-zohor"></span></div>
-        <div class="prayer-card" id="asar"><span class="label">ASAR</span> <span class="time">--:--</span> <span class="countdown" id="cd-asar"></span></div>
-        <div class="prayer-card" id="maghrib"><span class="label">MAGHRIB</span> <span class="time">--:--</span> <span class="countdown" id="cd-maghrib"></span></div>
-        <div class="prayer-card" id="isyak"><span class="label">ISYAK</span> <span class="time">--:--</span> <span class="countdown" id="cd-isyak"></span></div>
+        <div class="prayer-card" id="imsak"><span class="label">IMSAK</span><span class="time">--:--</span><span class="countdown" id="cd-imsak"></span></div>
+        <div class="prayer-card" id="subuh"><span class="label">SUBUH</span><span class="time">--:--</span><span class="countdown" id="cd-subuh"></span></div>
+        <div class="prayer-card" id="syuruk"><span class="label">SYURUK</span><span class="time">--:--</span><span class="countdown" id="cd-syuruk"></span></div>
+        <div class="prayer-card" id="zohor"><span class="label">ZOHOR</span><span class="time">--:--</span><span class="countdown" id="cd-zohor"></span></div>
+        <div class="prayer-card" id="asar"><span class="label">ASAR</span><span class="time">--:--</span><span class="countdown" id="cd-asar"></span></div>
+        <div class="prayer-card" id="maghrib"><span class="label">MAGHRIB</span><span class="time">--:--</span><span class="countdown" id="cd-maghrib"></span></div>
+        <div class="prayer-card" id="isyak"><span class="label">ISYAK</span><span class="time">--:--</span><span class="countdown" id="cd-isyak"></span></div>
     </div>
-
-    <footer>
-        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit.</marquee>
-    </footer>
 </div>
 
 <script>
     let prayerTimesData = null;
 
-    // 1. Format 12-jam (AM/PM)
     function format12h(timeStr) {
-        if (!timeStr || timeStr === "--:--") return "--:--";
+        if (!timeStr) return "--:--";
         let [hours, minutes] = timeStr.split(':');
         let h = parseInt(hours);
-        let modifier = h >= 12 ? 'PM' : 'AM';
+        let m = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
-        return `${h}:${minutes} ${modifier}`;
+        return `${h}:${minutes} ${m}`;
     }
 
-    // 2. Tarik Data API Baru & Simpan Global
-    async function kemaskiniWaktuSolat() {
-        const url = 'https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json';
-
+    async function getPrayerTimes() {
         try {
-            const respon = await fetch(url);
-            const data = await respon.json();
+            // Menggunakan API Selangor Zon 3 (Kuala Langat)
+            const res = await fetch('https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json');
+            const data = await res.json();
+            const today = new Date().toISOString().split('T')[0];
+            const info = data.jadual.find(item => item.tarikh === today);
 
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const dateISO = `${year}-${month}-${day}`;
-
-            const dataHariIni = data.jadual.find(item => item.tarikh === dateISO);
-
-            if (dataHariIni) {
-                prayerTimesData = dataHariIni.waktu;
-                const w = prayerTimesData;
-                const mapping = { imsak: 'imsak', subuh: 'subuh', syuruk: 'syuruq', zohor: 'zohor', asar: 'asar', maghrib: 'maghrib', isyak: 'isya' };
-                
-                for (let id in mapping) {
-                    document.querySelector(`#${id} .time`).innerText = format12h(w[mapping[id]]);
+            if (info) {
+                prayerTimesData = info.waktu;
+                const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
+                for (let id in map) {
+                    document.querySelector(`#${id} .time`).innerText = format12h(prayerTimesData[map[id]]);
                 }
-
-                checkHighlight(w);
-                updateCountdown();
+                updateHighlight();
             }
         } catch (e) { console.error("Ralat API:", e); }
     }
 
-    // 3. Fungsi Countdown (Masa Berbaki)
     function updateCountdown() {
         if (!prayerTimesData) return;
         const now = new Date();
-        const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
-        const apiKeys = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
+        const map = { imsak:'imsak', subuh:'subuh', syuruk:'syuruq', zohor:'zohor', asar:'asar', maghrib:'maghrib', isyak:'isya' };
+        
+        for (let id in map) {
+            const [h, m] = prayerTimesData[map[id]].split(':');
+            const target = new Date();
+            target.setHours(h, m, 0);
 
-        ids.forEach(id => {
-            const [h, m] = prayerTimesData[apiKeys[id]].split(':');
-            const pTime = new Date();
-            pTime.setHours(parseInt(h), parseInt(m), 0);
-
-            const diff = pTime - now;
-            const cdEl = document.getElementById(`cd-${id}`);
+            let diff = target - now;
             
+            // Jika waktu solat sudah lepas hari ini, jangan tunjuk countdown negatif
+            const el = document.getElementById(`cd-${id}`);
             if (diff > 0) {
-                const hours = Math.floor(diff / 3600000);
-                const mins = Math.floor((diff % 3600000) / 60000);
-                cdEl.innerText = hours > 0 ? `-${hours}j ${mins}m` : `-${mins}m`;
+                const totalSec = Math.floor(diff / 1000);
+                const hrs = Math.floor(totalSec / 3600);
+                const mins = Math.floor((totalSec % 3600) / 60);
+                const secs = totalSec % 60;
+                el.innerText = hrs > 0 ? `-${hrs}j ${mins}m` : `-${mins}m ${secs}s`;
             } else {
-                cdEl.innerText = ""; 
+                el.innerText = "";
             }
-        });
+        }
     }
 
-    // 4. Highlight Waktu Solat Aktif
-    function checkHighlight(w) {
+    function updateHighlight() {
+        if (!prayerTimesData) return;
         const now = new Date();
-        const cur = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const mapping = { 'subuh': w.subuh, 'zohor': w.zohor, 'asar': w.asar, 'maghrib': w.maghrib, 'isyak': w.isya };
+        const curTime = now.getHours() * 60 + now.getMinutes();
         
-        let active = "";
-        for (let id in mapping) { if (cur >= mapping[id]) active = id; }
-        
+        const times = [
+            {id:'subuh', t:prayerTimesData.subuh},
+            {id:'zohor', t:prayerTimesData.zohor},
+            {id:'asar', t:prayerTimesData.asar},
+            {id:'maghrib', t:prayerTimesData.maghrib},
+            {id:'isyak', t:prayerTimesData.isya}
+        ];
+
+        let activeId = "";
+        times.forEach(p => {
+            const [h, m] = p.t.split(':');
+            if (curTime >= (parseInt(h) * 60 + parseInt(m))) activeId = p.id;
+        });
+
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
-        if (active) document.getElementById(active).classList.add('highlight');
+        if (activeId) document.getElementById(activeId).classList.add('highlight');
     }
 
-    // 5. Jam & Tarikh
     function updateClock() {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
-        const masihi = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        
+        const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
+        
         document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
-        updateCountdown(); // Update countdown setiap saat bersama jam
+        updateCountdown();
     }
 
-    // 6. Slideshow
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -297,11 +266,8 @@
     }
 
     setInterval(updateClock, 1000);
-    setInterval(rotateSlides, 15000);
-    setInterval(kemaskiniWaktuSolat, 3600000);
-    
-    updateClock();
-    kemaskiniWaktuSolat();
+    setInterval(rotateSlides, 10000); // Tukar gambar setiap 10 saat
+    getPrayerTimes();
 </script>
 </body>
 </html>
