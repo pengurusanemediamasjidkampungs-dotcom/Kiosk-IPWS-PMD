@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V5.2 Hybrid</title>
+    <title>Kiosk Digital MKSLB - V5.2 Hybrid (Updated)</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -12,7 +12,7 @@
             --gold-glow: rgba(212, 175, 55, 0.3);
             --white: #ffffff;
             --cream: #FFFDD0;
-            --red-alert: #ff0000;
+            --red-alert: #ff4444;
             --grad: linear-gradient(90deg, #D4AF37, #f2d06b, #D4AF37);
         }
 
@@ -80,15 +80,25 @@
             transition: all 0.5s ease;
         }
 
-        .liquid-red {
-            background: rgba(139, 0, 0, 0.6) !important;
-            border: 1px solid var(--red-alert) !important;
-            animation: liquid-pulse 1.5s infinite alternate ease-in-out;
+        /* Gaya asal label */
+        .prayer-card .label { 
+            font-weight: 700; 
+            font-size: 1.1rem; 
+            opacity: 0.5; 
+            transition: all 0.5s ease;
         }
 
-        @keyframes liquid-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
-            100% { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); }
+        /* Kesan Glow hanya pada Nama Waktu Solat (Label) */
+        .glow-text {
+            color: var(--red-alert) !important;
+            opacity: 1 !important;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.4);
+            animation: pulse-text 1s infinite alternate;
+        }
+
+        @keyframes pulse-text {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
 
         #live-date { font-size: 1.1rem; color: var(--gold); font-weight: 600; }
@@ -141,8 +151,8 @@
             border-radius: 18px;
             height: 13.5%;
             transition: all 0.5s ease;
+            border: 1px solid transparent;
         }
-        .prayer-card .label { font-weight: 700; font-size: 1.1rem; opacity: 0.5; }
         .prayer-card .time { font-weight: 800; font-family: 'Courier New', monospace; font-size: 1.8rem; text-align: right; }
 
         .highlight {
@@ -265,7 +275,7 @@
             { id: 'isyak', key: 'isya' }
         ];
 
-        // 1. UPDATE HIGHLIGHT
+        // 1. HIGHLIGHT WAKTU SEMASA (Kekalkan bingkai emas pada waktu sekarang)
         let activeId = "";
         for (let p of schedule) {
             const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
@@ -277,14 +287,14 @@
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (activeId) document.getElementById(activeId).classList.add('highlight');
 
-        // 2. UPDATE COUNTDOWN
+        // 2. LOGIK COUNTDOWN & GLOW PADA NAMA WAKTU AKAN DATANG
         let nextPrayer = null;
         for (let p of schedule) {
             const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
             const target = new Date(now);
             target.setHours(h, m, 0, 0);
             if (target > now) {
-                nextPrayer = { name: p.id.toUpperCase(), target: target };
+                nextPrayer = { id: p.id, name: p.id.toUpperCase(), target: target };
                 break;
             }
         }
@@ -293,7 +303,7 @@
             const target = new Date(now);
             target.setDate(target.getDate() + 1);
             target.setHours(h, m, 0, 0);
-            nextPrayer = { name: "IMSAK (ESOK)", target: target };
+            nextPrayer = { id: "imsak", name: "IMSAK (ESOK)", target: target };
         }
 
         const diff = nextPrayer.target - now;
@@ -304,8 +314,20 @@
 
         const countdownEl = document.getElementById('header-countdown');
         countdownEl.innerText = `${nextPrayer.name}: -${hrs > 0 ? hrs + 'j ' : ''}${mins}m ${secs}s`;
-        if (hrs === 0 && mins < 10) countdownEl.classList.add('liquid-red');
-        else countdownEl.classList.remove('liquid-red');
+
+        // Buang glow lama pada semua label
+        document.querySelectorAll('.label').forEach(lbl => lbl.classList.remove('glow-text'));
+
+        // Aktifkan glow pada label waktu seterusnya jika < 10 minit
+        if (hrs === 0 && mins < 10) {
+            const nextLabel = document.querySelector(`#${nextPrayer.id} .label`);
+            if (nextLabel) nextLabel.classList.add('glow-text');
+            
+            // Warna merah pada teks countdown header sebagai amaran
+            countdownEl.style.color = "#ff4444";
+        } else {
+            countdownEl.style.color = "var(--cream)";
+        }
     }
 
     function updateClock() {
