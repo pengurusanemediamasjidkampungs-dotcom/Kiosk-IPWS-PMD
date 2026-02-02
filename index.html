@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V5.2 Hybrid (Updated)</title>
+    <title>Kiosk Digital MKSLB - V5.2 Hybrid (Auto-Detect)</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -184,11 +184,8 @@
     </div>
 
     <div class="content-area" id="slider">
-        <div class="slide active" style="background-image: url('program/JadualKuliahHarianFebruari%202026.jpg');">
-            <div class="dakwah-overlay"><div class="dakwah-text">"Jadual Kuliah Harian Sepanjang Februari 2026"</div></div>
-        </div>
-        <div class="slide" style="background-image: url('info/SelKitar.jpg');">
-            <div class="dakwah-overlay"><div class="dakwah-text">"Kebersihan itu sebahagian daripada iman."</div></div>
+        <div class="slide active">
+            <div class="dakwah-overlay"><div class="dakwah-text">Memuatkan kandungan dari GitHub...</div></div>
         </div>
     </div>
 
@@ -207,7 +204,60 @@
     let prayerTimesData = null;
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
+    let currentSlide = 0;
 
+    // --- BAHAGIAN AUTO-DETECT GITHUB ---
+    const repoOwner = "pengurusanemediamasjidkampungs-dotcom";
+    const repoName = "Kiosk-IPWS-PMD";
+
+    async function initKiosk() {
+        await getPrayerTimes();
+        await autoDetectImages();
+        setInterval(updateClock, 1000);
+        setInterval(rotateSlides, 10000);
+    }
+
+    async function autoDetectImages() {
+        const folders = ['program', 'info'];
+        let allImages = [];
+
+        for (const folder of folders) {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folder}`);
+                const files = await response.json();
+                
+                if (Array.isArray(files)) {
+                    const images = files
+                        .filter(f => /\.(jpe?g|png|webp|jpg)$/i.test(f.name))
+                        .map(f => ({
+                            url: f.path,
+                            name: f.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ")
+                        }));
+                    allImages = [...allImages, ...images];
+                }
+            } catch (e) { console.error(`Gagal akses folder ${folder}:`, e); }
+        }
+
+        if (allImages.length > 0) {
+            const slider = document.getElementById('slider');
+            slider.innerHTML = ''; // Bersihkan loading text
+            
+            allImages.forEach((img, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
+                slideDiv.style.backgroundImage = `url('${img.url}')`;
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'dakwah-overlay';
+                overlay.innerHTML = `<div class="dakwah-text">"${img.name}"</div>`;
+                
+                slideDiv.appendChild(overlay);
+                slider.appendChild(slideDiv);
+            });
+        }
+    }
+
+    // --- FUNGSI ASAL IMAM ---
     function normalizeTime(timeStr, prayerName) {
         if(!timeStr) return { h: 0, m: 0 };
         let [h, m] = timeStr.split(':').map(Number);
@@ -258,13 +308,12 @@
                     document.querySelector(`#${item.id} .time`).innerText = format12h(`${h}:${m}`);
                 });
             }
-        } catch (e) { console.error("Error Fetching:", e); }
+        } catch (e) { console.error("Error Fetching Prayer Times:", e); }
     }
 
     function updateLogic() {
         if (!prayerTimesData) return;
         const now = new Date();
-        
         const schedule = [
             { id: 'imsak', key: 'imsak' }, { id: 'subuh', key: 'subuh' },
             { id: 'syuruk', key: 'syuruq' }, { id: 'zohor', key: 'zohor' },
@@ -272,13 +321,11 @@
             { id: 'isyak', key: 'isya' }
         ];
 
-        // 1. CARI WAKTU SETERUSNYA (NEXT PRAYER)
         let next = null;
         for (let p of schedule) {
             const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
             const target = new Date(now);
             target.setHours(h, m, 0, 0);
-
             if (target > now) {
                 next = { id: p.id, name: p.id.toUpperCase(), target: target };
                 break;
@@ -293,17 +340,12 @@
             next = { id: "imsak", name: "IMSAK", target: target };
         }
 
-        // 2. BERSIHKAN GAYA LAMA
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         document.querySelectorAll('.label').forEach(l => l.classList.remove('glow-text'));
 
-        // 3. HIGHLIGHT KOTAK YANG SEDANG DIKIRA (NEXT PRAYER)
         const nextBox = document.getElementById(next.id);
-        if (nextBox) {
-            nextBox.classList.add('highlight');
-        }
+        if (nextBox) nextBox.classList.add('highlight');
 
-        // 4. KIRA COUNTDOWN
         const diff = next.target - now;
         const totalSec = Math.floor(diff / 1000);
         const hrs = Math.floor(totalSec / 3600);
@@ -313,7 +355,6 @@
         const countdownEl = document.getElementById('header-countdown');
         countdownEl.innerText = `${next.name}: -${hrs > 0 ? hrs + 'j ' : ''}${mins}m ${secs}s`;
 
-        // 5. EFEK GLOW JIKA < 10 MINIT
         if (hrs === 0 && mins < 10) {
             const nextLabel = document.querySelector(`#${next.id} .label`);
             if (nextLabel) nextLabel.classList.add('glow-text');
@@ -336,18 +377,16 @@
         if (h === 15 && m === 0 && !hasRefreshedPM) { hasRefreshedPM = true; location.reload(); }
     }
 
-    let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
-        if (slides.length === 0) return;
+        if (slides.length <= 1) return;
         slides[currentSlide].classList.remove('active');
         currentSlide = (currentSlide + 1) % slides.length;
         slides[currentSlide].classList.add('active');
     }
 
-    setInterval(updateClock, 1000);
-    setInterval(rotateSlides, 10000);
-    getPrayerTimes();
+    // Jalankan Kiosk
+    initKiosk();
 </script>
 </body>
 </html>
