@@ -7,18 +7,18 @@
 ![License](https://img.shields.io/badge/Owner-Unit_E--Media_MKSLB-gold?style=for-the-badge)
 
 ## 🌟 Pengenalan
-**Kiosk-IPWS-PMD** adalah sistem paparan digital (*Digital Signage*) mandiri yang dibina khas untuk menggantikan sistem pihak ketiga di MKSLB. Sistem ini berfungsi sebagai pusat penyampaian maklumat visual yang dinamik di dewan solat dan perkarangan masjid menggunakan teknologi awan (GitHub Pages).
+**Kiosk-IPWS-PMD** adalah sistem paparan digital (*Digital Signage*) mandiri yang dibina khas untuk menggantikan sistem pihak ketiga di MKSLB. Sistem ini berfungsi sebagai pusat penyampaian maklumat visual yang dinamik menggunakan teknologi GitHub Pages.
 
 ---
 
 ## 🚀 Ciri-Ciri Utama
 * **⌚ Real-Time Prayer Times:** Integrasi automatik dengan `api-takwim-solat-selangor-2026`.
-* **🖼️ Dynamic Slide:** Paparan poster program, aktiviti masjid, dan infografik dakwah yang boleh dikemaskini dari jauh.
-* **📜 Running Text (Marquee):** Makluman segera atau hadis pilihan yang bergerak di bahagian bawah skrin.
-* **💎 Apple Liquid Glass UI:** Antaramuka moden yang bersih dan premium, sesuai untuk paparan TV bersaiz besar (HD/4K).
-* **⚡ Zero Cost:** Berjalan sepenuhnya di atas infrastruktur GitHub tanpa yuran langganan bulanan/tahunan.
+* **🖼️ Dynamic Slide:** Paparan poster program dan infografik dakwah.
+* **📜 Running Text:** Makluman segera yang bergerak di bahagian bawah skrin.
+* **⚡ Zero Cost:** Tanpa yuran langganan bulanan/tahunan.
 
 ---
+
 ## 🛠️ Arsitektur Sistem
 
 ```mermaid
