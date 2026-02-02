@@ -70,42 +70,23 @@
         .slide.active { display: block; }
 
         .dakwah-overlay {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            border-bottom: 4px solid var(--gold);
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 80%; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid var(--gold);
         }
 
         .dakwah-text { font-size: 1.6rem; font-style: italic; font-weight: 300; line-height: 1.4; }
 
         .prayer-sidebar {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-radius: 30px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--glass); backdrop-filter: blur(25px); border-radius: 30px;
+            padding: 15px; display: flex; flex-direction: column; gap: 10px;
+            justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);
         }
 
         .prayer-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 25px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            font-size: 1.6rem;
-            transition: all 0.5s ease;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 25px; background: rgba(255,255,255,0.03);
+            border-radius: 20px; font-size: 1.6rem; transition: all 0.5s ease;
             border-left: 5px solid transparent;
         }
 
@@ -115,24 +96,15 @@
         .prayer-card.imsak-style { border-left-color: #666; opacity: 0.8; }
 
         .prayer-card.highlight {
-            background: var(--gold);
-            color: black;
-            font-weight: bold;
-            transform: scale(1.03);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            background: var(--gold); color: black; font-weight: bold;
+            transform: scale(1.03); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
             border-left-color: white;
         }
 
         footer {
-            grid-column: 1 / -1;
-            background: var(--gold);
-            color: black;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            font-size: 1.8rem;
-            font-weight: 800;
-            overflow: hidden;
+            grid-column: 1 / -1; background: var(--gold); color: black;
+            border-radius: 20px; display: flex; align-items: center;
+            font-size: 1.8rem; font-weight: 800; overflow: hidden;
         }
 
         @keyframes fadeEffect { from {opacity: 0.3} to {opacity: 1} }
@@ -155,24 +127,16 @@
 
     <div class="content-area" id="slider">
         <div class="slide active" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/JadualKuliahHarianFebruari%202026.jpg');">
-            <div class="dakwah-overlay">
-                <div class="dakwah-text">Jadual Kuliah Harian Sepanjang Februari 2026.</div>
-            </div>
+            <div class="dakwah-overlay"><div class="dakwah-text">Jadual Kuliah Harian Sepanjang Februari 2026.</div></div>
         </div>
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/KuliahBulananFebruari2026KuliahPerdana.jpg');">
-            <div class="dakwah-overlay">
-                <div class="dakwah-text">Kuliah Perdana: Jemput hadir memenuhi taman-taman syurga.</div>
-            </div>
+            <div class="dakwah-overlay"><div class="dakwah-text">Kuliah Perdana: Jemput hadir memenuhi taman-taman syurga.</div></div>
         </div>
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('program/Majlis-Bacaan-Yasin-Nisfu-Syaaban.jpg');">
-            <div class="dakwah-overlay">
-                <div class="dakwah-text">Majlis Bacaan Yasin & Nisfu Sya'ban.</div>
-            </div>
+            <div class="dakwah-overlay"><div class="dakwah-text">Majlis Bacaan Yasin & Nisfu Sya'ban.</div></div>
         </div>
         <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('info/SelKitar.jpg');">
-            <div class="dakwah-overlay">
-                <div class="dakwah-text">"Kebersihan itu sebahagian daripada iman." - Pastikan kawasan masjid sentiasa bersih.</div>
-            </div>
+            <div class="dakwah-overlay"><div class="dakwah-text">"Kebersihan itu sebahagian daripada iman."</div></div>
         </div>
     </div>
 
@@ -187,79 +151,78 @@
     </div>
 
     <footer>
-        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit atau mod senyap di dalam dewan solat.</marquee>
+        <marquee scrollamount="10">MAKLUMAN: Majlis Bacaan Yasin & Doa Selamat diadakan setiap malam Jumaat. Sila matikan telefon bimbit.</marquee>
     </footer>
 </div>
 
 <script>
-    /**
-     * Kiosk-IPWS-PMD Logic
-     */
-
-    // 1. Fungsi Pembantu: Format AM/PM
+    // 1. Format 12-jam (AM/PM)
     function format12h(timeStr) {
         if (!timeStr || timeStr === "--:--") return "--:--";
         let [hours, minutes] = timeStr.split(':');
-        let modifier = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        return `${hours}:${minutes} ${modifier}`;
+        let h = parseInt(hours);
+        let modifier = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${minutes} ${modifier}`;
     }
 
-    // 2. Kemaskini Jam & Tarikh
-    function updateClock() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
-        
-        const clockElement = document.getElementById('live-clock');
-        if(clockElement) clockElement.innerText = timeString;
-
-        const masihi = now.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
-
-        const dateElement = document.getElementById('live-date');
-        if(dateElement) dateElement.innerText = `${masihi} | ${hijri}`;
-    }
-
-    // 3. Tarik Data API (SGR03)
+    // 2. Tarik Data API Baru
     async function kemaskiniWaktuSolat() {
         const url = 'https://raw.githubusercontent.com/pengurusanemediamasjidkampungs-dotcom/api-takwim-solat-selangor-2026/main/selangor-zon3.json';
 
         try {
             const respon = await fetch(url);
-            if (!respon.ok) throw new Error('Gagal mengakses fail API');
             const data = await respon.json();
 
+            // Format ISO: YYYY-MM-DD (e.g., 2026-02-02)
             const today = new Date();
-            const dateKey = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-');
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateISO = `${year}-${month}-${day}`;
 
-            // PERBAIKAN: Akses melalui objek 'takwim' mengikut struktur JSON anda
-            const jadual = data.takwim[dateKey];
+            // Cari dalam array 'jadual'
+            const dataHariIni = data.jadual.find(item => item.tarikh === dateISO);
 
-            if (jadual) {
-                const ids = ['imsak', 'subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
-                ids.forEach(id => {
-                    const el = document.querySelector(`#${id} .time`);
-                    if (el) el.innerText = format12h(jadual[id]);
-                });
-                checkHighlight(jadual);
+            if (dataHariIni) {
+                const w = dataHariIni.waktu;
+                // Pemetaan ID HTML ke Nama Medan API Baru
+                document.querySelector('#imsak .time').innerText = format12h(w.imsak);
+                document.querySelector('#subuh .time').innerText = format12h(w.subuh);
+                document.querySelector('#syuruk .time').innerText = format12h(w.syuruq); // syuruq
+                document.querySelector('#zohor .time').innerText = format12h(w.zohor);
+                document.querySelector('#asar .time').innerText = format12h(w.asar);
+                document.querySelector('#maghrib .time').innerText = format12h(w.maghrib);
+                document.querySelector('#isyak .time').innerText = format12h(w.isya); // isya
+
+                checkHighlight(w);
             }
         } catch (e) { console.error("Ralat API:", e); }
     }
 
-    // 4. Highlight Waktu Semasa
-    function checkHighlight(jadual) {
+    // 3. Highlight Waktu Solat
+    function checkHighlight(w) {
         const now = new Date();
-        const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const ids = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
+        const cur = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        const mapping = { 'subuh': w.subuh, 'zohor': w.zohor, 'asar': w.asar, 'maghrib': w.maghrib, 'isyak': w.isya };
         
         let active = "";
-        for (let id of ids) { if (current >= jadual[id]) active = id; }
+        for (let id in mapping) { if (cur >= mapping[id]) active = id; }
         
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (active) document.getElementById(active).classList.add('highlight');
     }
 
-    // 5. Slider Slideshow
+    // 4. Jam & Tarikh
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
+        const masihi = now.toLocaleDateString('ms-MY', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
+        document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
+    }
+
+    // 5. Slideshow
     let currentSlide = 0;
     function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
@@ -269,7 +232,6 @@
         slides[currentSlide].classList.add('active');
     }
 
-    // Jalankan Kiosk
     setInterval(updateClock, 1000);
     setInterval(rotateSlides, 15000);
     setInterval(kemaskiniWaktuSolat, 3600000);
