@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V5.0 Stable</title>
+    <title>Kiosk Digital MKSLB - V5.2 Hybrid</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -67,7 +67,7 @@
         }
 
         #header-countdown {
-            min-width: 350px;
+            min-width: 380px;
             text-align: center;
             padding: 8px 18px;
             border-radius: 15px;
@@ -200,26 +200,19 @@
     let hasRefreshedAM = false;
     let hasRefreshedPM = false;
 
-    // --- FUNGSI PENTERJEMAH UTAMA (FIX FORMAT 1:30 -> 13:30) ---
     function normalizeTime(timeStr, prayerName) {
         if(!timeStr) return { h: 0, m: 0 };
         let [h, m] = timeStr.split(':').map(Number);
         const name = prayerName.toLowerCase();
-
-        // Waktu yang jatuh pada waktu petang/malam dalam JSON anda
         if (['zohor', 'asar', 'maghrib', 'isya', 'isyak'].includes(name)) {
             if (h < 12) h += 12; 
         }
-        
         if (['imsak', 'subuh'].includes(name) && h === 12) h = 0;
-
         return { h, m };
     }
 
-    // Format paparan jam
     function format12h(input, includeSeconds = false) {
         let hours, minutes, seconds = 0;
-        
         if (input instanceof Date) {
             hours = input.getHours();
             minutes = input.getMinutes();
@@ -229,13 +222,11 @@
             hours = parts[0];
             minutes = parts[1];
         }
-        
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours % 12 || 12;
         const hStr = displayHours.toString().padStart(2, '0');
         const mStr = minutes.toString().padStart(2, '0');
         const sStr = seconds.toString().padStart(2, '0');
-        
         return includeSeconds ? `${hStr}:${mStr}:${sStr} ${ampm}` : `${hStr}:${mStr} ${ampm}`;
     }
 
@@ -248,53 +239,55 @@
             
             if (info) {
                 prayerTimesData = info.waktu;
-                
                 const map = [
-                    {id: 'imsak', key: 'imsak'},
-                    {id: 'subuh', key: 'subuh'},
-                    {id: 'syuruk', key: 'syuruq'},
-                    {id: 'zohor', key: 'zohor'},
-                    {id: 'asar', key: 'asar'},
-                    {id: 'maghrib', key: 'maghrib'},
+                    {id: 'imsak', key: 'imsak'}, {id: 'subuh', key: 'subuh'},
+                    {id: 'syuruk', key: 'syuruq'}, {id: 'zohor', key: 'zohor'},
+                    {id: 'asar', key: 'asar'}, {id: 'maghrib', key: 'maghrib'},
                     {id: 'isyak', key: 'isya'}
                 ];
-
                 map.forEach(item => {
                     const {h, m} = normalizeTime(prayerTimesData[item.key], item.id);
                     document.querySelector(`#${item.id} .time`).innerText = format12h(`${h}:${m}`);
                 });
-
-                updateHighlight();
             }
         } catch (e) { console.error("Error Fetching:", e); }
     }
 
-    function updateMainCountdown(now) {
+    function updateLogic() {
         if (!prayerTimesData) return;
-
-        const pTimes = [
-            { name: "IMSAK", key: "imsak" },
-            { name: "SUBUH", key: "subuh" },
-            { name: "SYURUK", key: "syuruq" },
-            { name: "ZOHOR", key: "zohor" },
-            { name: "ASAR", key: "asar" },
-            { name: "MAGHRIB", key: "maghrib" },
-            { name: "ISYAK", key: "isya" }
+        const now = new Date();
+        const curTotalMin = (now.getHours() * 60) + now.getMinutes();
+        
+        const schedule = [
+            { id: 'imsak', key: 'imsak' }, { id: 'subuh', key: 'subuh' },
+            { id: 'syuruk', key: 'syuruq' }, { id: 'zohor', key: 'zohor' },
+            { id: 'asar', key: 'asar' }, { id: 'maghrib', key: 'maghrib' },
+            { id: 'isyak', key: 'isya' }
         ];
 
-        let nextPrayer = null;
+        // 1. UPDATE HIGHLIGHT
+        let activeId = "";
+        for (let p of schedule) {
+            const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
+            if (curTotalMin >= (h * 60 + m)) activeId = p.id;
+        }
+        if (curTotalMin < (normalizeTime(prayerTimesData['imsak'], 'imsak').h * 60 + normalizeTime(prayerTimesData['imsak'], 'imsak').m)) {
+            activeId = "isyak"; 
+        }
+        document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
+        if (activeId) document.getElementById(activeId).classList.add('highlight');
 
-        for (let p of pTimes) {
-            const { h, m } = normalizeTime(prayerTimesData[p.key], p.name);
+        // 2. UPDATE COUNTDOWN
+        let nextPrayer = null;
+        for (let p of schedule) {
+            const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
             const target = new Date(now);
             target.setHours(h, m, 0, 0);
-
             if (target > now) {
-                nextPrayer = { name: p.name, target: target };
+                nextPrayer = { name: p.id.toUpperCase(), target: target };
                 break;
             }
         }
-
         if (!nextPrayer) {
             const { h, m } = normalizeTime(prayerTimesData["imsak"], "imsak");
             const target = new Date(now);
@@ -311,69 +304,22 @@
 
         const countdownEl = document.getElementById('header-countdown');
         countdownEl.innerText = `${nextPrayer.name}: -${hrs > 0 ? hrs + 'j ' : ''}${mins}m ${secs}s`;
-
         if (hrs === 0 && mins < 10) countdownEl.classList.add('liquid-red');
         else countdownEl.classList.remove('liquid-red');
-    }
-
-    function updateHighlight() {
-        if (!prayerTimesData) return;
-        const now = new Date();
-        const curTotalMin = (now.getHours() * 60) + now.getMinutes();
-        
-        const schedule = [
-            { id: 'imsak', key: 'imsak' },
-            { id: 'subuh', key: 'subuh' },
-            { id: 'syuruk', key: 'syuruq' },
-            { id: 'zohor', key: 'zohor' },
-            { id: 'asar', key: 'asar' },
-            { id: 'maghrib', key: 'maghrib' },
-            { id: 'isyak', key: 'isya' }
-        ];
-
-        let activeId = "";
-
-        // Cari waktu solat terakhir yang telah dilewati
-        for (let p of schedule) {
-            const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
-            const prayerTotalMin = (h * 60) + m;
-            
-            if (curTotalMin >= prayerTotalMin) {
-                activeId = p.id;
-            }
-        }
-
-        // Jika sekarang masih awal pagi (sebelum Imsak), highlight Isyak malam tadi
-        const imsakTime = normalizeTime(prayerTimesData['imsak'], 'imsak');
-        if (curTotalMin < (imsakTime.h * 60 + imsakTime.m)) {
-            activeId = "isyak"; 
-        }
-
-        document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
-        if (activeId) {
-            const activeCard = document.getElementById(activeId);
-            if (activeCard) activeCard.classList.add('highlight');
-        }
-    }
-
-    function checkAutoRefresh(now) {
-        const hour = now.getHours();
-        const min = now.getMinutes();
-        if (hour === 2 && min === 0 && !hasRefreshedAM) { hasRefreshedAM = true; location.reload(); }
-        if (hour === 15 && min === 0 && !hasRefreshedPM) { hasRefreshedPM = true; location.reload(); }
     }
 
     function updateClock() {
         const now = new Date();
         document.getElementById('live-clock').innerText = format12h(now, true);
-        
         const masihi = now.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         const hijri = new Intl.DateTimeFormat('ms-MY-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(now);
         document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
+        updateLogic();
         
-        updateMainCountdown(now);
-        updateHighlight();
-        checkAutoRefresh(now);
+        // Auto Refresh Logic
+        const h = now.getHours(), m = now.getMinutes();
+        if (h === 2 && m === 0 && !hasRefreshedAM) { hasRefreshedAM = true; location.reload(); }
+        if (h === 15 && m === 0 && !hasRefreshedPM) { hasRefreshedPM = true; location.reload(); }
     }
 
     let currentSlide = 0;
