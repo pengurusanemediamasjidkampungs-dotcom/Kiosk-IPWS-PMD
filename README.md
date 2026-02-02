@@ -1,3 +1,4 @@
+Markdown
 # 🖥️ Kiosk-IPWS-PMD
 > **Sistem Paparan Pintar: Info Paparan Waktu Solat, Program & Makluman Dakwah**
 > *Masjid Kampung Sungai Lang Baru (MKSLB) - Sesi 2026/2030*
@@ -27,33 +28,30 @@ graph LR
     C[📅 API Takwim] -- Fetch Data --> B
     D[📱 E-Media Admin] -- Push Image/Text --> A
     B -- Display --> E[🖥️ Mini PC / Smart TV Masjid]
+📁 Struktur Kandungan
+index.html : Enjin utama paparan kiosk (Logic & UI).
 
-### 📁 Struktur Kandungan
-* `index.html` : Enjin utama paparan kiosk (Logic & UI).
-* `assets/` : Folder simpanan imej poster program, pengumuman, dan grafik dakwah.
-* `README.md` : Dokumentasi teknikal dan panduan pengurusan.
+assets/ : Folder simpanan imej poster dan grafik dakwah.
 
----
+README.md : Dokumentasi teknikal dan panduan pengurusan.
 
-## ⚙️ Cara Kemaskini Kandungan
-Untuk mengemaskini maklumat yang terpapar pada TV di dewan solat, pentadbir hanya perlu melakukan langkah berikut:
+⚙️ Cara Kemaskini Kandungan
+Iklan/Poster: Muat naik fail imej ke folder assets/ dan kemaskini pautan di index.html.
 
-1.  **Iklan/Poster:** Muat naik fail imej baharu ke dalam folder `assets/` dan kemaskini pautan imej di dalam fail `index.html`.
-2.  **Teks Bergerak:** Tukar teks pengumuman di dalam tag `<marquee>` pada fail `index.html`.
-3.  **Commit & Push:** Simpan perubahan (Commit) dan hantar (Push) ke GitHub. Paparan TV akan dikemaskini secara automatik dalam masa 1-2 minit.
+Teks Bergerak: Tukar teks di dalam tag <marquee> pada fail index.html.
 
----
+Commit & Push: Simpan perubahan ke GitHub untuk kemaskini automatik.
 
-## 📅 Pelan Pembangunan (Roadmap)
-- [x] **Fasa 1:** Integrasi API Waktu Solat Selangor (Zon 3).
-- [x] **Fasa 2:** Pembangunan antaramuka (UI) bertema *Apple Liquid Glass*.
-- [ ] **Fasa 3:** Integrasi kandungan video dakwah pendek (Format MP4/YouTube).
-- [ ] **Fasa 4:** Paparan automatik jumlah kutipan tabung mingguan masjid.
+📅 Pelan Pembangunan (Roadmap)
+[x] Fasa 1: Integrasi API Waktu Solat Selangor.
 
----
+[x] Fasa 2: Pembangunan UI Liquid Glass.
 
-## 👨‍💻 Pembangun Sistem
-**Unit E-Media & Digital MKSLB** *Menerajui Transformasi Digital Institusi Masjid demi keredhaan-Nya.*
+[ ] Fasa 3: Integrasi Video Dakwah (MP4/YouTube).
 
----
-© 2026 **Masjid Kampung Sungai Lang Baru**. Semua Hak Terpelihara.
+[ ] Fasa 4: Paparan automatik jumlah kutipan tabung mingguan.
+
+👨‍💻 Pembangun Sistem
+Unit E-Media & Digital MKSLB Menerajui Transformasi Digital Institusi Masjid demi keredhaan-Nya.
+
+© 2026 Masjid Kampung Sungai Lang Baru. Semua Hak Terpelihara.
