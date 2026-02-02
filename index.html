@@ -207,11 +207,10 @@
         const name = prayerName.toLowerCase();
 
         // Waktu yang jatuh pada waktu petang/malam dalam JSON anda
-        if (['zohor', 'asar', 'maghrib', 'isya'].includes(name)) {
-            if (h < 12) h += 12; // Tukar 1:30 jadi 13:30, 7:29 jadi 19:29 dll
+        if (['zohor', 'asar', 'maghrib', 'isya', 'isyak'].includes(name)) {
+            if (h < 12) h += 12; 
         }
         
-        // Safety check untuk Imsak/Subuh jika ditulis jam 12:xx malam
         if (['imsak', 'subuh'].includes(name) && h === 12) h = 0;
 
         return { h, m };
@@ -226,7 +225,6 @@
             minutes = input.getMinutes();
             seconds = input.getSeconds();
         } else {
-            // Jika string dari JSON
             const parts = input.split(':').map(Number);
             hours = parts[0];
             minutes = parts[1];
@@ -251,7 +249,6 @@
             if (info) {
                 prayerTimesData = info.waktu;
                 
-                // Kemaskini paparan sidebar dengan label AM/PM yang betul
                 const map = [
                     {id: 'imsak', key: 'imsak'},
                     {id: 'subuh', key: 'subuh'},
@@ -298,7 +295,6 @@
             }
         }
 
-        // Jika dah lepas Isyak, cari Imsak esok
         if (!nextPrayer) {
             const { h, m } = normalizeTime(prayerTimesData["imsak"], "imsak");
             const target = new Date(now);
@@ -323,29 +319,41 @@
     function updateHighlight() {
         if (!prayerTimesData) return;
         const now = new Date();
-        const curMin = now.getHours() * 60 + now.getMinutes();
+        const curTotalMin = (now.getHours() * 60) + now.getMinutes();
         
         const schedule = [
-            {id: 'imsak', key: 'imsak'},
-            {id: 'subuh', key: 'subuh'},
-            {id: 'syuruk', key: 'syuruq'},
-            {id: 'zohor', key: 'zohor'},
-            {id: 'asar', key: 'asar'},
-            {id: 'maghrib', key: 'maghrib'},
-            {id: 'isyak', key: 'isya'}
+            { id: 'imsak', key: 'imsak' },
+            { id: 'subuh', key: 'subuh' },
+            { id: 'syuruk', key: 'syuruq' },
+            { id: 'zohor', key: 'zohor' },
+            { id: 'asar', key: 'asar' },
+            { id: 'maghrib', key: 'maghrib' },
+            { id: 'isyak', key: 'isya' }
         ];
 
         let activeId = "";
+
+        // Cari waktu solat terakhir yang telah dilewati
         for (let p of schedule) {
             const { h, m } = normalizeTime(prayerTimesData[p.key], p.id);
-            const pMin = h * 60 + m;
-            if (curMin >= pMin) {
+            const prayerTotalMin = (h * 60) + m;
+            
+            if (curTotalMin >= prayerTotalMin) {
                 activeId = p.id;
             }
         }
 
+        // Jika sekarang masih awal pagi (sebelum Imsak), highlight Isyak malam tadi
+        const imsakTime = normalizeTime(prayerTimesData['imsak'], 'imsak');
+        if (curTotalMin < (imsakTime.h * 60 + imsakTime.m)) {
+            activeId = "isyak"; 
+        }
+
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
-        if (activeId) document.getElementById(activeId).classList.add('highlight');
+        if (activeId) {
+            const activeCard = document.getElementById(activeId);
+            if (activeCard) activeCard.classList.add('highlight');
+        }
     }
 
     function checkAutoRefresh(now) {
