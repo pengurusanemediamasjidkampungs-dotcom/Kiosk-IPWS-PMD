@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Digital MKSLB</title>
+    <style>
+        :root {
+            --dark-bg: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.1);
+            --gold: #D4AF37;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--dark-bg);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Container Utama */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 450px; /* Slide kiri, Takwim kanan */
+            grid-template-rows: 180px 1fr 100px; /* Header, Content, Marquee */
+            height: 100vh;
+            gap: 15px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* Header Area */
+        header {
+            grid-column: 1 / -1;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo { width: 100px; height: 100px; margin-right: 25px; }
+        .masjid-name h1 { margin: 0; font-size: 2.8rem; color: var(--gold); }
+        .clock-box { margin-left: auto; text-align: right; }
+        #live-clock { font-size: 4rem; font-weight: 800; font-family: monospace; }
+
+        /* Slide Show Area */
+        .content-area {
+            background: rgba(255,255,255,0.02);
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .slide {
+            width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            display: none;
+            animation: fade 1.5s;
+        }
+        .slide.active { display: block; }
+
+        /* Sidebar Waktu Solat */
+        .prayer-sidebar {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .prayer-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            font-size: 1.8rem;
+        }
+        .prayer-card.highlight {
+            background: var(--gold);
+            color: black;
+            font-weight: bold;
+            transform: scale(1.02);
+        }
+
+        /* Footer Marquee */
+        footer {
+            grid-column: 1 / -1;
+            background: var(--gold);
+            color: black;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        @keyframes fade { from {opacity: 0.4} to {opacity: 1} }
+    </style>
+</head>
+<body>
+
+<div class="main-grid">
+    <header>
+        <img src="assets/logo.png" class="logo" alt="Logo">
+        <div class="masjid-name">
+            <h1>MASJID KAMPUNG SUNGAI LANG BARU</h1>
+            <p>Sesi Pentadbiran Digital 2026/2030</p>
+        </div>
+        <div class="clock-box">
+            <div id="live-clock">00:00:00</div>
+            <div id="live-date" style="font-size: 1.2rem; opacity: 0.8;">--/--/----</div>
+        </div>
+    </header>
+
+    <div class="content-area" id="slider">
+        <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1590076215667-873d32838380?q=80&w=2070');"></div>
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1542621334-a254cf47733d?q=80&w=2070');"></div>
+    </div>
+
+    <div class="prayer-sidebar">
+        <div class="prayer-card" id="subuh"><span>SUBUH</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="syuruk"><span>SYURUK</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="zohor"><span>ZOHOR</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="asar"><span>ASAR</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="maghrib"><span>MAGHRIB</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="isyak"><span>ISYAK</span> <span class="time">--:--</span></div>
+    </div>
+
+    <footer>
+        <marquee scrollamount="8">MAKLUMAN: Sila pastikan telefon bimbit dimatikan atau diletakkan dalam mod senyap sebelum masuk ke ruang solat. Jazakallah.</marquee>
+    </footer>
+</div>
+
+<script>
+    // 1. Ambil Data dari API Takwim anda
+    async function getPrayerTimes() {
+        try {
+            const res = await fetch('https://pengurusanemediamasjidkampungs-dotcom.github.io/api-takwim-solat-selangor-2026/selangor-zon3.json');
+            const data = await res.json();
+            const today = new Date().getDate();
+            const times = data.takwim[today - 1].waktu;
+
+            document.querySelector('#subuh .time').innerText = times.subuh;
+            document.querySelector('#syuruk .time').innerText = times.syuruk;
+            document.querySelector('#zohor .time').innerText = times.zohor;
+            document.querySelector('#asar .time').innerText = times.asar;
+            document.querySelector('#maghrib .time').innerText = times.maghrib;
+            document.querySelector('#isyak .time').innerText = times.isyak;
+        } catch (e) { console.error("Ralat API:", e); }
+    }
+
+    // 2. Jam & Tarikh
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
+        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', {dateStyle: 'full'});
+    }
+
+    // 3. Slider Iklan
+    let currentSlide = 0;
+    function slideShow() {
+        const slides = document.querySelectorAll('.slide');
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+
+    setInterval(updateClock, 1000);
+    setInterval(slideShow, 15000); // Tukar iklan setiap 15 saat
+    getPrayerTimes();
+</script>
+
+</body>
+</html>
