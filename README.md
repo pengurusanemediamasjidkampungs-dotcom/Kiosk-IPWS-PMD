@@ -28,6 +28,8 @@ graph LR
     C[📅 API Takwim] -- Fetch Data --> B
     D[📱 E-Media Admin] -- Push Image/Text --> A
     B -- Display --> E[🖥️ Mini PC / Smart TV Masjid]
+```
+
 📁 Struktur Kandungan
 index.html : Enjin utama paparan kiosk (Logic & UI).
 
