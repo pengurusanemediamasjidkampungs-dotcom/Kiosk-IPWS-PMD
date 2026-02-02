@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB - V4.0 Liquid Glass Edition</title>
+    <title>Kiosk Digital MKSLB - V4.2 Final Stable</title>
     <style>
         :root {
             --dark-bg: #050505;
@@ -35,7 +35,6 @@
             box-sizing: border-box;
         }
 
-        /* HEADER */
         header {
             grid-column: 1 / -1;
             background: var(--glass);
@@ -51,7 +50,6 @@
         .masjid-name h1 { margin: 0; font-size: 2.1rem; color: var(--gold); }
         .masjid-name p { margin: 5px 0 0; opacity: 0.8; font-size: 1rem; }
 
-        /* CLOCK & COUNTDOWN BOX */
         .clock-box { 
             margin-left: auto; 
             display: flex; 
@@ -60,44 +58,37 @@
             gap: 5px;
         }
         
-        #live-clock { 
-            font-size: 3.8rem; 
-            font-weight: 900; 
-            font-family: 'Monaco', monospace; 
-            line-height: 1; 
-        }
+        #live-clock { font-size: 3.8rem; font-weight: 900; font-family: 'Monaco', monospace; line-height: 1; }
 
-        /* COUNTDOWN HEADER - LIQUID GLASS EFFECT */
         #header-countdown {
-            padding: 5px 15px;
-            border-radius: 12px;
+            padding: 8px 18px;
+            border-radius: 15px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: 800;
-            font-size: 1.4rem;
-            transition: all 0.5s ease;
-            background: rgba(255, 255, 255, 0.05);
+            font-size: 1.3rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--cream);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
         }
 
-        /* RED GLOW LIQUID EFFECT (AKTIF BILA < 10 MINIT) */
+        /* LIQUID RED EFFECT (Bila < 10 minit) */
         .liquid-red {
-            background: rgba(255, 0, 0, 0.2) !important;
+            background: rgba(139, 0, 0, 0.4) !important;
             border: 1px solid var(--red-alert) !important;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.2);
-            color: #ffffff !important;
-            animation: pulse-red 1.5s infinite alternate;
-            text-shadow: 0 0 5px #fff;
+            color: #fff !important;
+            text-shadow: 0 0 8px rgba(255,255,255,0.8);
+            animation: liquid-pulse 1.5s infinite alternate ease-in-out;
         }
 
-        @keyframes pulse-red {
-            from { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
-            to { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 0, 0, 0.7); }
+        @keyframes liquid-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+            100% { transform: scale(1.05); box-shadow: 0 0 35px rgba(255, 0, 0, 0.7), inset 0 0 15px rgba(255,0,0,0.4); }
         }
 
         #live-date { font-size: 1.1rem; color: var(--gold); font-weight: 600; }
 
-        /* INFO BAR */
         .info-bar {
             grid-column: 1 / -1;
             background: var(--grad);
@@ -113,22 +104,9 @@
         }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* CONTENT AREA */
-        .content-area {
-            background: #000;
-            border-radius: 30px;
-            overflow: hidden;
-            position: relative;
-        }
-        .slide {
-            width: 100%; height: 100%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            display: none;
-            animation: zoomFade 1.5s ease-out;
-        }
-        .slide.active { display: block; }
+        .content-area { background: #000; border-radius: 30px; overflow: hidden; position: relative; }
+        .slide { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; display: none; }
+        .slide.active { display: block; animation: zoomFade 1.5s ease-out; }
         @keyframes zoomFade { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
 
         .dakwah-overlay {
@@ -140,7 +118,6 @@
         }
         .dakwah-text { font-size: 1.3rem; font-style: italic; opacity: 0.9; }
 
-        /* PRAYER SIDEBAR */
         .prayer-sidebar {
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -170,7 +147,6 @@
             box-shadow: 0 0 20px var(--gold-glow);
         }
         .highlight .label, .highlight .time { opacity: 1; color: var(--gold); }
-
     </style>
 </head>
 <body>
@@ -222,7 +198,7 @@
 
     function format12h(timeStr, includeSeconds = false) {
         if (!timeStr) return "--:--";
-        let hours, minutes, seconds = "00";
+        let hours, minutes, seconds = 0;
         if (timeStr instanceof Date) {
             hours = timeStr.getHours();
             minutes = timeStr.getMinutes();
@@ -231,8 +207,8 @@
             [hours, minutes] = timeStr.split(':').map(Number);
         }
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        const hStr = hours < 10 ? '0' + hours : hours;
+        const displayHours = hours % 12 || 12;
+        const hStr = displayHours < 10 ? '0' + displayHours : displayHours;
         const mStr = minutes < 10 ? '0' + minutes : minutes;
         const sStr = seconds < 10 ? '0' + seconds : seconds;
         return includeSeconds ? `${hStr}:${mStr}:${sStr} ${ampm}` : `${hStr}:${mStr} ${ampm}`;
@@ -252,13 +228,13 @@
                 }
                 updateHighlight();
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error Fetching:", e); }
     }
 
     function updateMainCountdown(now) {
         if (!prayerTimesData) return;
 
-        const times = [
+        const pTimes = [
             { name: "IMSAK", time: prayerTimesData.imsak },
             { name: "SUBUH", time: prayerTimesData.subuh },
             { name: "SYURUK", time: prayerTimesData.syuruq },
@@ -269,23 +245,24 @@
         ];
 
         let nextPrayer = null;
-        for (let p of times) {
-            const [h, m] = p.time.split(':');
-            const target = new Date();
-            target.setHours(h, m, 0);
+
+        for (let p of pTimes) {
+            const [h, m] = p.time.split(':').map(Number);
+            const target = new Date(now);
+            target.setHours(h, m, 0, 0);
+
             if (target > now) {
                 nextPrayer = { name: p.name, target: target };
                 break;
             }
         }
 
-        // Jika semua waktu hari ini dah lepas, ambil Imsak esok (anggaran hari esok)
         if (!nextPrayer) {
-            const [h, m] = times[0].time.split(':');
-            const target = new Date();
+            const [h, m] = pTimes[0].time.split(':').map(Number);
+            const target = new Date(now);
             target.setDate(target.getDate() + 1);
-            target.setHours(h, m, 0);
-            nextPrayer = { name: "IMSAK (ESOK)", target: target };
+            target.setHours(h, m, 0, 0);
+            nextPrayer = { name: "IMSAK", target: target };
         }
 
         const diff = nextPrayer.target - now;
@@ -309,8 +286,8 @@
     function checkAutoRefresh(now) {
         const hour = now.getHours();
         const min = now.getMinutes();
-        if (hour === 2 && min === 0 && !hasRefreshedAM) { location.reload(); }
-        if (hour === 15 && min === 0 && !hasRefreshedPM) { location.reload(); }
+        if (hour === 2 && min === 0 && !hasRefreshedAM) { hasRefreshedAM = true; location.reload(); }
+        if (hour === 15 && min === 0 && !hasRefreshedPM) { hasRefreshedPM = true; location.reload(); }
     }
 
     function updateClock() {
@@ -321,13 +298,14 @@
         document.getElementById('live-date').innerText = `${masihi} | ${hijri}`;
         
         updateMainCountdown(now);
+        updateHighlight();
         checkAutoRefresh(now);
     }
 
     function updateHighlight() {
         if (!prayerTimesData) return;
         const now = new Date();
-        const curTime = now.getHours() * 60 + now.getMinutes();
+        const curMin = now.getHours() * 60 + now.getMinutes();
         const times = [
             {id:'subuh', t:prayerTimesData.subuh},
             {id:'zohor', t:prayerTimesData.zohor},
@@ -337,8 +315,8 @@
         ];
         let activeId = "";
         times.forEach(p => {
-            const [h, m] = p.t.split(':');
-            if (curTime >= (parseInt(h) * 60 + parseInt(m))) activeId = p.id;
+            const [h, m] = p.t.split(':').map(Number);
+            if (curMin >= (h * 60 + m)) activeId = p.id;
         });
         document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
         if (activeId) document.getElementById(activeId).classList.add('highlight');
