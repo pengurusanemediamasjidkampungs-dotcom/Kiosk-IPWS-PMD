@@ -3,39 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosk Digital MKSLB</title>
+    <title>Kiosk Digital MKSLB - V1.5 Premium</title>
     <style>
         :root {
-            --dark-bg: #0a0a0a;
-            --glass: rgba(255, 255, 255, 0.1);
+            --dark-bg: #050505;
+            --glass: rgba(255, 255, 255, 0.08);
             --gold: #D4AF37;
+            --white: #ffffff;
         }
 
         body {
             margin: 0; padding: 0;
             background: var(--dark-bg);
-            color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
         }
 
-        /* Container Utama */
+        /* Layout Grid Utama */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 450px; /* Slide kiri, Takwim kanan */
-            grid-template-rows: 180px 1fr 100px; /* Header, Content, Marquee */
+            grid-template-columns: 1fr 450px;
+            grid-template-rows: 160px 1fr 90px;
             height: 100vh;
             gap: 15px;
             padding: 15px;
             box-sizing: border-box;
         }
 
-        /* Header Area */
+        /* HEADER AREA */
         header {
             grid-column: 1 / -1;
             background: var(--glass);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border-radius: 25px;
             display: flex;
             align-items: center;
@@ -43,37 +45,59 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .logo { width: 100px; height: 100px; margin-right: 25px; }
-        .masjid-name h1 { margin: 0; font-size: 2.8rem; color: var(--gold); }
-        .clock-box { margin-left: auto; text-align: right; }
-        #live-clock { font-size: 4rem; font-weight: 800; font-family: monospace; }
+        .logo { width: 90px; height: 90px; margin-right: 25px; object-fit: contain; }
+        .masjid-name h1 { margin: 0; font-size: 2.4rem; color: var(--gold); letter-spacing: 1px; }
+        .masjid-name p { margin: 5px 0 0; opacity: 0.7; font-size: 1.1rem; }
 
-        /* Slide Show Area */
+        .clock-box { margin-left: auto; text-align: right; }
+        #live-clock { font-size: 4.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        #live-date { font-size: 1.3rem; margin-top: 5px; color: var(--gold); }
+
+        /* CONTENT AREA (SLIDER) */
         .content-area {
             background: rgba(255,255,255,0.02);
             border-radius: 30px;
             overflow: hidden;
             position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .slide {
             width: 100%; height: 100%;
-            background-size: cover; background-position: center;
+            background-size: cover;
+            background-position: center;
             display: none;
-            animation: fade 1.5s;
+            animation: fadeEffect 1.5s ease-in-out;
         }
+
         .slide.active { display: block; }
 
-        /* Sidebar Waktu Solat */
+        /* Dakwah Overlay Teks */
+        .dakwah-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border-bottom: 4px solid var(--gold);
+        }
+
+        .dakwah-text { font-size: 1.6rem; font-style: italic; font-weight: 300; line-height: 1.4; }
+
+        /* PRAYER SIDEBAR */
         .prayer-sidebar {
             background: var(--glass);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
             border-radius: 30px;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
@@ -82,18 +106,26 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 30px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 20px;
             font-size: 1.8rem;
+            transition: all 0.5s ease;
+            border: 1px solid transparent;
         }
+
+        .prayer-card .label { font-weight: 300; letter-spacing: 2px; }
+        .prayer-card .time { font-weight: 700; font-family: monospace; font-size: 2.2rem; }
+
+        /* Highlight Waktu Aktif/Seterusnya */
         .prayer-card.highlight {
             background: var(--gold);
             color: black;
             font-weight: bold;
-            transform: scale(1.02);
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
         }
 
-        /* Footer Marquee */
+        /* FOOTER MARQUEE */
         footer {
             grid-column: 1 / -1;
             background: var(--gold);
@@ -102,48 +134,58 @@
             display: flex;
             align-items: center;
             font-size: 1.8rem;
-            font-weight: 700;
+            font-weight: 800;
+            overflow: hidden;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
-        @keyframes fade { from {opacity: 0.4} to {opacity: 1} }
+        @keyframes fadeEffect { from {opacity: 0.3} to {opacity: 1} }
     </style>
 </head>
 <body>
 
 <div class="main-grid">
     <header>
-        <img src="assets/logo.png" class="logo" alt="Logo">
+        <img src="assets/logo.png" class="logo" alt="MKSLB">
         <div class="masjid-name">
             <h1>MASJID KAMPUNG SUNGAI LANG BARU</h1>
-            <p>Sesi Pentadbiran Digital 2026/2030</p>
+            <p>Unit E-Media & Digital | Platform Syiar Kreatif</p>
         </div>
         <div class="clock-box">
             <div id="live-clock">00:00:00</div>
-            <div id="live-date" style="font-size: 1.2rem; opacity: 0.8;">--/--/----</div>
+            <div id="live-date">Memuatkan tarikh...</div>
         </div>
     </header>
 
     <div class="content-area" id="slider">
-        <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1590076215667-873d32838380?q=80&w=2070');"></div>
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1542621334-a254cf47733d?q=80&w=2070');"></div>
+        <div class="slide active" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1590076215667-873d32838380?q=80&w=2070');">
+            <div class="dakwah-overlay">
+                <div class="dakwah-text">"Sampaikanlah dariku walau satu ayat." (HR Bukhari)</div>
+            </div>
+        </div>
+        <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542621334-a254cf47733d?q=80&w=2070');">
+            <div class="dakwah-overlay">
+                <div class="dakwah-text">Kebersihan itu sebahagian daripada iman. Pastikan masjid kita bersih.</div>
+            </div>
+        </div>
     </div>
 
     <div class="prayer-sidebar">
-        <div class="prayer-card" id="subuh"><span>SUBUH</span> <span class="time">--:--</span></div>
-        <div class="prayer-card" id="syuruk"><span>SYURUK</span> <span class="time">--:--</span></div>
-        <div class="prayer-card" id="zohor"><span>ZOHOR</span> <span class="time">--:--</span></div>
-        <div class="prayer-card" id="asar"><span>ASAR</span> <span class="time">--:--</span></div>
-        <div class="prayer-card" id="maghrib"><span>MAGHRIB</span> <span class="time">--:--</span></div>
-        <div class="prayer-card" id="isyak"><span>ISYAK</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="subuh"><span class="label">SUBUH</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="syuruk"><span class="label">SYURUK</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="zohor"><span class="label">ZOHOR</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="asar"><span class="label">ASAR</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="maghrib"><span class="label">MAGHRIB</span> <span class="time">--:--</span></div>
+        <div class="prayer-card" id="isyak"><span class="label">ISYAK</span> <span class="time">--:--</span></div>
     </div>
 
     <footer>
-        <marquee scrollamount="8">MAKLUMAN: Sila pastikan telefon bimbit dimatikan atau diletakkan dalam mod senyap sebelum masuk ke ruang solat. Jazakallah.</marquee>
+        <marquee scrollamount="10">MAKLUMAN: Sila pastikan telefon bimbit dimatikan atau diletakkan dalam mod senyap sebelum masuk ke ruang solat. Jazakallah Khairan.</marquee>
     </footer>
 </div>
 
 <script>
-    // 1. Ambil Data dari API Takwim anda
+    // 1. Ambil Data API & Kemaskini UI
     async function getPrayerTimes() {
         try {
             const res = await fetch('https://pengurusanemediamasjidkampungs-dotcom.github.io/api-takwim-solat-selangor-2026/selangor-zon3.json');
@@ -151,33 +193,62 @@
             const today = new Date().getDate();
             const times = data.takwim[today - 1].waktu;
 
-            document.querySelector('#subuh .time').innerText = times.subuh;
-            document.querySelector('#syuruk .time').innerText = times.syuruk;
-            document.querySelector('#zohor .time').innerText = times.zohor;
-            document.querySelector('#asar .time').innerText = times.asar;
-            document.querySelector('#maghrib .time').innerText = times.maghrib;
-            document.querySelector('#isyak .time').innerText = times.isyak;
-        } catch (e) { console.error("Ralat API:", e); }
+            const ids = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+            ids.forEach(id => {
+                document.querySelector(`#${id} .time`).innerText = times[id];
+            });
+
+            checkHighlight(times);
+        } catch (e) {
+            console.error("Gagal mendapatkan data takwim:", e);
+        }
     }
 
-    // 2. Jam & Tarikh
+    // 2. Fungsi Highlight Waktu Solat Aktif
+    function checkHighlight(times) {
+        const now = new Date();
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        
+        const ids = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+        let currentPrayer = "";
+
+        for (let i = 0; i < ids.length; i++) {
+            if (currentTime >= times[ids[i]]) {
+                currentPrayer = ids[i];
+            }
+        }
+
+        document.querySelectorAll('.prayer-card').forEach(c => c.classList.remove('highlight'));
+        if (currentPrayer) {
+            document.getElementById(currentPrayer).classList.add('highlight');
+        }
+    }
+
+    // 3. Jam & Tarikh
     function updateClock() {
         const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false});
-        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', {dateStyle: 'full'});
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('ms-MY', {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('live-date').innerText = now.toLocaleDateString('ms-MY', options);
     }
 
-    // 3. Slider Iklan
+    // 4. Slider Automatik
     let currentSlide = 0;
-    function slideShow() {
+    function rotateSlides() {
         const slides = document.querySelectorAll('.slide');
+        if (slides.length === 0) return;
         slides[currentSlide].classList.remove('active');
         currentSlide = (currentSlide + 1) % slides.length;
         slides[currentSlide].classList.add('active');
     }
 
+    // Settings
     setInterval(updateClock, 1000);
-    setInterval(slideShow, 15000); // Tukar iklan setiap 15 saat
+    setInterval(rotateSlides, 15000); 
+    setInterval(getPrayerTimes, 3600000); // Semak API setiap jam
+
+    updateClock();
     getPrayerTimes();
 </script>
 
